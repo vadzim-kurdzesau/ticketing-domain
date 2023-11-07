@@ -1,0 +1,23 @@
+@startuml
+
+interface "Interface A" as I1
+component "Component A" as C1
+
+interface "Interface B" as I2
+
+note top of I1
+    An interface that defines
+    the component being modeled
+end note
+
+note right of C1
+    A self-contained unit that
+    can be replaced at design time
+    or runtime by a component
+    that offers equivalent functionality
+end note
+
+I1 - C1
+C1 ..> I2: <<uses>>
+
+@enduml
