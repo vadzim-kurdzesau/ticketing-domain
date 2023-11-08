@@ -1,0 +1,38 @@
+@startuml "component-diagram"
+
+[Events Page] <<UI>>
+[Events Page] ..> [Checkout Page] : <<uses>>
+[Events Page] ..left..> [Events Organization Page] : <<uses>>
+[Events Page] ..> [User's Cart Page] : <<uses>>
+
+[Checkout Page] <<UI>>
+[Checkout Page] - Payment
+[Checkout Page] --( Transaction
+[Transaction Service] -left- Transaction
+
+interface "Authentication\n        and \nAuthorization" as I_Identity
+[Events Page] -right-( I_Identity
+[Identity Service] -left- I_Identity
+
+interface "     Event\nOrganization" as I_Events_Organization
+[Events Organization Page] <<UI>>
+[Events Organization Page] -down- I_Events_Organization
+
+interface "     Events\nManagement" as I_Events_Management
+[Events Service] -right- I_Events_Management
+[Events Organization Page] -left-( I_Events_Management
+
+interface "Events List" as I_Events_List
+[Events Page] -up-( I_Events_List
+[Events Service] -up- I_Events_List
+
+interface "Events Storage" as I_Events_Storage
+[Events Service] -down-( I_Events_Storage
+[Events Database] -up- I_Events_Storage
+
+interface "     Shopping Cart" as I_Shopping_Cart
+[User's Cart Page] <<UI>>
+[User's Cart Page] --( I_Shopping_Cart
+[Cart Service] -left- I_Shopping_Cart
+
+@enduml
