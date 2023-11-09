@@ -1,38 +1,66 @@
 @startuml "component-diagram"
 
-[Events Page] <<UI>>
-[Events Page] ..> [Checkout Page] : <<uses>>
-[Events Page] ..left..> [Events Organization Page] : <<uses>>
-[Events Page] ..> [User's Cart Page] : <<uses>>
+[Events Page] <<UI>> #SkyBlue
+[Events Page] .down.> [Checkout Page] : <<uses>>
+[Events Page] ..down..> [Events Organization Page] : <<uses>>
+[Events Page] .down.> [User's Cart Page] : <<uses>>
+[Events Page] .down.> [Event Notifications Page] : <<uses>>
+[Events Page] ..down..> [Ticket Booking Page] : <<uses>>
 
-[Checkout Page] <<UI>>
+[Checkout Page] <<UI>> #SkyBlue
 [Checkout Page] - Payment
-[Checkout Page] --( Transaction
-[Transaction Service] -left- Transaction
+[Checkout Page] -down-( Transaction
+[Transaction Service] -up- Transaction
 
 interface "Authentication\n        and \nAuthorization" as I_Identity
-[Events Page] -right-( I_Identity
-[Identity Service] -left- I_Identity
+[Events Page] --( I_Identity
+[Identity Service] -- I_Identity
+interface "Identity Storage" as I_Identity_Storage
+[Identity Service] --( I_Identity_Storage
+[Identity Database] -- I_Identity_Storage
 
 interface "     Event\nOrganization" as I_Events_Organization
-[Events Organization Page] <<UI>>
-[Events Organization Page] -down- I_Events_Organization
+[Events Organization Page] <<UI>> #SkyBlue
+[Events Organization Page] -- I_Events_Organization
 
 interface "     Events\nManagement" as I_Events_Management
-[Events Service] -right- I_Events_Management
-[Events Organization Page] -left-( I_Events_Management
+[Events Service] -- I_Events_Management
+[Events Organization Page] --( I_Events_Management
 
 interface "Events List" as I_Events_List
-[Events Page] -up-( I_Events_List
-[Events Service] -up- I_Events_List
+[Events Page] --( I_Events_List
+[Events Service] -- I_Events_List
 
 interface "Events Storage" as I_Events_Storage
-[Events Service] -down-( I_Events_Storage
-[Events Database] -up- I_Events_Storage
+[Events Service] --( I_Events_Storage
+[Events Database] -- I_Events_Storage
 
 interface "     Shopping Cart" as I_Shopping_Cart
-[User's Cart Page] <<UI>>
-[User's Cart Page] --( I_Shopping_Cart
-[Cart Service] -left- I_Shopping_Cart
+[User's Cart Page] <<UI>> #SkyBlue
+[User's Cart Page] -down-( I_Shopping_Cart
+[Cart Service] -up- I_Shopping_Cart
+
+interface "Cart Storage" as I_Cart_Storage
+[Cart Service] -down-( I_Cart_Storage
+[Cart Cache] -up- I_Cart_Storage
+
+interface "User Notifications Management" as I_Notifications_Management
+[Event Notifications Page] -- I_Notifications_Management
+interface "Events Notification" as I_Events_Notification
+[Event Notifications Page] <<UI>> #SkyBlue
+[Event Notifications Page] -down-( I_Events_Notification
+[Events Service] - I_Events_Notification
+
+interface "User Notification" as I_User_Notification
+[Notification Service] - I_User_Notification
+[Events Service] --( I_User_Notification
+
+interface "Operations with Tickets" as I_Tickets_Operations
+[Ticket Booking Page] <<UI>> #SkyBlue
+[Tickets Service] -up- I_Tickets_Operations
+[Ticket Booking Page] -down-( I_Tickets_Operations
+interface "Tickets Storage" as I_Tickets_Storage
+[Tickets Service] --( I_Tickets_Storage
+[Tickets Database] -- I_Tickets_Storage
 
 @enduml
