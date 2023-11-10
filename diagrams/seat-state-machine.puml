@@ -6,7 +6,7 @@ Booked --> Available : Timer Ran Out
 Booked --> Available : User Removes\nthe Ticket from Cart
 
 state Booked {
-    state "Booked Timer Running" as timer {
+    state "Booking Timer Running" as timer {
         [*] --> Running
         Running --> Finished: Timer\nRan Out
         Finished --> [*]
