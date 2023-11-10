@@ -1,0 +1,27 @@
+@startuml lowest-price-seat-booking-sequence-diagram
+
+actor User as user
+participant "Booking Page" as bookingPage
+participant "Seats Service" as seatsService
+database "Events Database" as eventsDb
+
+activate eventsDb
+
+user -> bookingPage ++ : Show Seats
+bookingPage -> seatsService ++ : List Event Seats
+seatsService -> eventsDb : Get Event Seats
+eventsDb --> seatsService : Return Event Seats
+seatsService --> bookingPage : Return List of Seats
+bookingPage --> user : Display Seats
+
+loop until all seats are checked
+    user -> bookingPage : Check Seat's Price
+
+    alt cheaper than previously chosen
+        bookingPage --> user : Remember this Seat
+    else not cheaper
+        bookingPage --> user: Do Nothing
+    end
+end
+
+@enduml
