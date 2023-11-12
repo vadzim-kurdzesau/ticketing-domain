@@ -1,27 +1,106 @@
 @startuml lowest-price-seat-booking-sequence-diagram
 
-actor User as user
+actor Customer as user
+participant "Events Page" as eventsPage
 participant "Booking Page" as bookingPage
-participant "Seats Service" as seatsService
+participant "Checkout Page" as checkoutPage
+participant "Events Service" as eventService
 database "Events Database" as eventsDb
 
-activate eventsDb
+participant "Booking Service" as bookingService
+participant "Cart Service" as cartService
+database "Cart Cache" as cartCache
+participant "Transaction Service" as transactionService
+participant "Notification Service" as notifications
+queue "Message Queue" as queueService
 
-user -> bookingPage ++ : Show Seats
-bookingPage -> seatsService ++ : List Event Seats
-seatsService -> eventsDb : Get Event Seats
-eventsDb --> seatsService : Return Event Seats
-seatsService --> bookingPage : Return List of Seats
-bookingPage --> user : Display Seats
+activate eventsDb
+activate eventService
+activate bookingService
+activate cartService
+activate transactionService
+activate notifications
+
+user -> eventsPage ++ : Check Available Events
+eventsPage -> eventService : Get Available Events
+eventService -> eventsDb : Get Available Events
+eventsDb --> eventService : Return Available Events
+eventService --> eventsPage : Return Available Events
+eventsPage -> user : Display Available Events
+
+
+user -> eventsPage : Select Event
+eventsPage -> bookingPage ++ : Redirect to
+deactivate eventsPage
+bookingPage -> eventService : Request Venue Manifest
+eventService -> eventsDb : Get Venue Seats
+eventsDb --> eventService : Return Venue Seats
+eventService --> bookingPage : Return Venue Manifest
+bookingPage --> user: Display Event Manifest
 
 loop until all seats are checked
-    user -> bookingPage : Check Seat's Price
+    alt is seat available
+        user -> bookingPage : Check Seat's Price
 
-    alt cheaper than previously chosen
-        bookingPage --> user : Remember this Seat
-    else not cheaper
-        bookingPage --> user: Do Nothing
+        alt cheaper than previously chosen
+            bookingPage --> user : Select this Seat
+        else not cheaper
+            bookingPage --> user: Do Nothing
+        end 
     end
 end
+
+
+user -> bookingPage : Book Selected Seat
+bookingPage -> bookingService : Book Seat
+bookingService -> queueService ++ : Notify Seat Has Been Booked
+queueService -> eventService : Notify Seat Has Been Booked
+eventService --> queueService : Acknowledge
+eventService -> eventsDb : Change Seat State to 'Booked'
+eventsDb --> eventService : Operation was Successful
+
+queueService -> cartService : Notify Seat Has Been Booked
+cartService --> queueService : Acknowledge
+cartService -> cartCache ++: Add Booking to Cache
+cartCache --> cartService : Operation was Successful
+bookingService --> bookingPage : Acknowledge Booking
+
+bookingPage --> user -- : Display that Booking was Successful
+
+
+user -> checkoutPage ++: Open Cart
+checkoutPage -> cartService : Gets User's Cart
+cartService -> cartCache : Get User's Cart
+cartCache --> cartService : Return User's Bookings
+cartService --> checkoutPage : Return User's Cart
+checkoutPage --> user : Display User's Cart
+
+user -> checkoutPage: Pay for Seats
+checkoutPage -> transactionService : Buy Seats
+transactionService -> queueService : Notify Seat Has Been Purchased
+
+queueService -> eventService : Notify Seat Has Been Purchased
+eventService --> queueService : Acknowledge
+eventService -> eventsDb : Change Seat State to 'Sold'
+eventsDb --> eventService : Operation was Successful
+
+queueService -> cartService : Notify Seat Has Been Purchased
+cartService --> queueService : Acknowledge
+cartService -> cartCache : Remove Booking from Cache
+cartCache --> cartService : Operation was Successful
+
+queueService -> notifications : Notify Seat Has Been Purchased
+notifications --> queueService : Acknowledge
+notifications -> : Send Tickets to User's Email
+notifications <-- : Receive Acknowledgement
+
+checkoutPage --> user --: Display that Payment was Successful
+
+deactivate eventsDb
+deactivate eventService
+deactivate bookingService
+deactivate cartService
+deactivate transactionService
+deactivate notifications
 
 @enduml
