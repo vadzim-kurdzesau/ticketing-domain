@@ -1,66 +1,65 @@
 @startuml "component-diagram"
 
-[Events Page] <<UI>> #SkyBlue
-[Events Page] .down.> [Checkout Page] : <<uses>>
-[Events Page] ..down..> [Events Organization Page] : <<uses>>
-[Events Page] .down.> [User's Cart Page] : <<uses>>
-[Events Page] .down.> [Event Notifications Page] : <<uses>>
-[Events Page] ..down..> [Ticket Booking Page] : <<uses>>
+!define webPage rectangle #SkyBlue
+!define externalSystem cloud
 
-[Checkout Page] <<UI>> #SkyBlue
-[Checkout Page] - Payment
-[Checkout Page] -down-( Transaction
-[Transaction Service] -up- Transaction
+webPage "Customers' Interface" <<UI>> as Customer_UI
+interface "Request Entry Point" as I_EntryPoint
+
+Customer_UI --( I_EntryPoint
+[API Gateway] as Gateway
+Gateway -up- I_EntryPoint
 
 interface "Authentication\n        and \nAuthorization" as I_Identity
-[Events Page] --( I_Identity
+interface "Customer Notification" as I_Notifications
+interface "Booking Management" as I_Booking_Management
+interface "    Event\nManagement" as I_Event_Management
+interface "Shopping Cart" as I_Shopping_Cart
+interface "Payment Proccessing" as I_Payment_Proccessing
+
+Gateway -right-( I_Identity
+Gateway -down-( I_Notifications
+Gateway -down-( I_Booking_Management
+Gateway -down-( I_Event_Management
+Gateway -down-( I_Shopping_Cart
+Gateway -down-( I_Payment_Proccessing
+
 [Identity Service] -- I_Identity
 interface "Identity Storage" as I_Identity_Storage
+database "Identity Database" as IdentityDb
+IdentityDb -- I_Identity_Storage
 [Identity Service] --( I_Identity_Storage
-[Identity Database] -- I_Identity_Storage
 
-interface "     Event\nOrganization" as I_Events_Organization
-[Events Organization Page] <<UI>> #SkyBlue
-[Events Organization Page] -- I_Events_Organization
-
-interface "     Events\nManagement" as I_Events_Management
-[Events Service] -- I_Events_Management
-[Events Organization Page] --( I_Events_Management
-
-interface "Events List" as I_Events_List
-[Events Page] --( I_Events_List
-[Events Service] -- I_Events_List
-
+[Event Service] -up- I_Event_Management
 interface "Events Storage" as I_Events_Storage
-[Events Service] --( I_Events_Storage
-[Events Database] -- I_Events_Storage
+[Event Service] --( I_Events_Storage
+database "Events Database" as eventsDb
+eventsDb -up- I_Events_Storage
 
-interface "     Shopping Cart" as I_Shopping_Cart
-[User's Cart Page] <<UI>> #SkyBlue
-[User's Cart Page] -down-( I_Shopping_Cart
+[Booking Service] -up- I_Booking_Management
+
+[Notification Service] -up- I_Notifications
+interface "Email Notification" as I_Email_Service
+[Notification Service] --( I_Email_Service
+externalSystem "Email Service" as email
+email -up- I_Email_Service
+
 [Cart Service] -up- I_Shopping_Cart
-
 interface "Cart Storage" as I_Cart_Storage
 [Cart Service] -down-( I_Cart_Storage
-[Cart Cache] -up- I_Cart_Storage
+database "Cart Cache" as CartDb
+CartDb -up- I_Cart_Storage
 
-interface "User Notifications Management" as I_Notifications_Management
-[Event Notifications Page] -- I_Notifications_Management
-interface "Events Notification" as I_Events_Notification
-[Event Notifications Page] <<UI>> #SkyBlue
-[Event Notifications Page] -down-( I_Events_Notification
-[Events Service] - I_Events_Notification
+[Transaction Service] -up- I_Payment_Proccessing
 
-interface "User Notification" as I_User_Notification
-[Notification Service] - I_User_Notification
-[Events Service] --( I_User_Notification
+interface "Services Communication" as I_Bus_Service
+queue "Message Broker" as messageBroker
+messageBroker -up- I_Bus_Service
 
-interface "Operations with Tickets" as I_Tickets_Operations
-[Ticket Booking Page] <<UI>> #SkyBlue
-[Tickets Service] -up- I_Tickets_Operations
-[Ticket Booking Page] -down-( I_Tickets_Operations
-interface "Tickets Storage" as I_Tickets_Storage
-[Tickets Service] --( I_Tickets_Storage
-[Tickets Database] -- I_Tickets_Storage
+[Transaction Service] -down-( I_Bus_Service
+[Notification Service] -down-( I_Bus_Service
+[Booking Service] -down-( I_Bus_Service
+[Event Service] -down-( I_Bus_Service
+[Cart Service] -down-( I_Bus_Service
 
 @enduml

@@ -1,9 +1,9 @@
 @startuml lowest-price-seat-booking-sequence-diagram
 
 actor Customer as user
-participant "Events Page" as eventsPage
-participant "Booking Page" as bookingPage
-participant "Checkout Page" as checkoutPage
+boundary "Events Page" as eventsPage
+boundary "Booking Page" as bookingPage
+boundary "Checkout Page" as checkoutPage
 participant "Events Service" as eventService
 database "Events Database" as eventsDb
 
@@ -102,5 +102,7 @@ deactivate bookingService
 deactivate cartService
 deactivate transactionService
 deactivate notifications
+deactivate queueService
+deactivate cartCache
 
 @enduml
