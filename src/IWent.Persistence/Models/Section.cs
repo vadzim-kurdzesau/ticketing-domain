@@ -24,6 +24,11 @@ public class Section
     public int VenueId { get; set; }
 
     /// <summary>
+    /// The venue containing this section.
+    /// </summary>
+    public Venue Venue { get; set; } = null!;
+
+    /// <summary>
     /// The type of seats in this section.
     /// </summary>
     public SeatType SeatType { get; set; }

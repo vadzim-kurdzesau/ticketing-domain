@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace IWent.Persistence.Models;
 
@@ -40,5 +41,10 @@ public class Venue
     /// <summary>
     /// The seating arrangement of this particular venue (complete seat map).
     /// </summary>
-    public IEnumerable<Section> Manifest { get; set; } = null!;
+    public IEnumerable<Section> Sections { get; set; } = null!;
+
+    /// <summary>
+    /// The events 
+    /// </summary>
+    public IEnumerable<Event> Events { get; set; } = Array.Empty<Event>();
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace IWent.Persistence.Models;
 
@@ -23,7 +24,12 @@ public class Row
     public int SectionId { get; set; }
 
     /// <summary>
+    /// The section containing this row.
+    /// </summary>
+    public Section Section { get; set; } = null!;
+
+    /// <summary>
     /// The list this row's seats.
     /// </summary>
-    public ICollection<Seat> Seats { get; set; } = new List<Seat>();
+    public IEnumerable<Seat> Seats { get; set; } = Array.Empty<Seat>();
 }

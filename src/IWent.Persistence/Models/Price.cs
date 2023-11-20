@@ -1,4 +1,7 @@
-﻿namespace IWent.Persistence.Models;
+﻿using System;
+using System.Collections.Generic;
+
+namespace IWent.Persistence.Models;
 
 /// <summary>
 /// Represents an offer single or multiple seats must be sold for.
@@ -19,4 +22,9 @@ public class Price
     /// The value of a price.
     /// </summary>
     public decimal Amount { get; set; }
+
+    /// <summary>
+    /// The list of seats with this price offer.
+    /// </summary>
+    public IEnumerable<Seat> Seats { get; set; } = Array.Empty<Seat>();
 }
