@@ -9,14 +9,19 @@ namespace IWent.Persistence.Models;
 public class Section
 {
     /// <summary>
+    /// The unique identifier of the venue.
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
+    /// The name of this section.
+    /// </summary>
+    public string Name { get; set; } = null!;
+
+    /// <summary>
     /// The identifier of the venue containing this section.
     /// </summary>
     public int VenueId { get; set; }
-
-    /// <summary>
-    /// The unique name of this section.
-    /// </summary>
-    public string Name { get; set; } = null!;
 
     /// <summary>
     /// The type of seats in this section.

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace IWent.Persistence.Models;
 
@@ -11,7 +10,12 @@ public class Row
     /// <summary>
     /// The unique identifier of the row.
     /// </summary>
-    public int RowId { get; set; }
+    public int Id { get; set; }
+
+    /// <summary>
+    /// The name of the row.
+    /// </summary>
+    public string Name { get; set; } = null!;
 
     /// <summary>
     /// The identifier of the section containing this row.
@@ -21,5 +25,5 @@ public class Row
     /// <summary>
     /// The list this row's seats.
     /// </summary>
-    public IEnumerable<Seat> Rows { get; set; } = Array.Empty<Seat>();
+    public ICollection<Seat> Seats { get; set; } = new List<Seat>();
 }

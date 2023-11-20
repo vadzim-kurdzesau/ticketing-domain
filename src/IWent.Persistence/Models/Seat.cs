@@ -1,4 +1,6 @@
-﻿namespace IWent.Persistence.Models;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace IWent.Persistence.Models;
 
 /// <summary>
 /// Represents the smallest manifest unit that can be purchased or booked.
@@ -6,14 +8,9 @@
 public class Seat
 {
     /// <summary>
-    /// The identifier of the venue containing this section.
+    /// The unique identifier of the seat.
     /// </summary>
-    public int VenueId { get; set; }
-
-    /// <summary>
-    /// The unique name of a section where this seat is located.
-    /// </summary>
-    public string SectionName { get; set; } = null!;
+    public int Id { get; set; }
 
     /// <summary>
     /// The unique number of this seat in this section.
@@ -23,6 +20,7 @@ public class Seat
     /// <summary>
     /// The identifier of the row containing this seat.
     /// </summary>
+    [Column("row_id")]
     public int RowId { get; set; }
 
     /// <summary>
