@@ -1,10 +1,17 @@
-﻿namespace IWent.Persistence.Models;
+﻿using System.Collections.Generic;
+
+namespace IWent.Persistence.Models;
 
 /// <summary>
 /// Represents a physical place where an event is happening.
 /// </summary>
 public class Venue
 {
+    /// <summary>
+    /// The unique identifier of the venue.
+    /// </summary>
+    public int Id { get; set; }
+
     /// <summary>
     /// The name of the venue.
     /// </summary>
@@ -33,5 +40,5 @@ public class Venue
     /// <summary>
     /// The seating arrangement of this particular venue (complete seat map).
     /// </summary>
-    public Manifest Manifest { get; set; } = null!;
+    public IEnumerable<Section> Manifest { get; set; } = null!;
 }

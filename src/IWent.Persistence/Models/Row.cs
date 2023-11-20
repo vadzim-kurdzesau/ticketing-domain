@@ -1,21 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace IWent.Persistence.Models;
 
 /// <summary>
-/// Represents a row of seats within a section.
+/// Represents a physical row of seats within a section.
 /// </summary>
 public class Row
 {
-    // TODO: add the ID
+    /// <summary>
+    /// The unique identifier of the row.
+    /// </summary>
+    public int RowId { get; set; }
 
     /// <summary>
-    /// The name of the row.
+    /// The identifier of the section containing this row.
     /// </summary>
-    public string Name { get; set; } = null!;
+    public int SectionId { get; set; }
 
     /// <summary>
-    /// The seats within the row.
+    /// The list this row's seats.
     /// </summary>
-    public IEnumerable<Seat> Seats { get; set; } = null!;
+    public IEnumerable<Seat> Rows { get; set; } = Array.Empty<Seat>();
 }
