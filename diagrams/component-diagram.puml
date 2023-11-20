@@ -51,6 +51,10 @@ database "Cart Cache" as CartDb
 CartDb -up- I_Cart_Storage
 
 [Transaction Service] -up- I_Payment_Proccessing
+interface "Transactions History" as I_Transactions_Storage
+[Transaction Service] -down- I_Transactions_Storage
+database "Transactions Database" as TransactionDb
+TransactionDb -up- I_Transactions_Storage
 
 interface "Services Communication" as I_Bus_Service
 queue "Message Broker" as messageBroker
