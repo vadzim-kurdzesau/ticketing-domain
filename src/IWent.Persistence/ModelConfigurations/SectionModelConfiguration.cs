@@ -8,7 +8,8 @@ internal class SectionModelConfiguration : IEntityTypeConfiguration<Section>
 {
     public void Configure(EntityTypeBuilder<Section> builder)
     {
-        builder.ToTable("dbo.sections");
+        builder.Property(s => s.Name)
+            .HasMaxLength(50);
 
         builder.HasMany(s => s.Rows)
             .WithOne(r => r.Section);

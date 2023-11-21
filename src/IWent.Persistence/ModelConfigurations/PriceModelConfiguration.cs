@@ -8,6 +8,7 @@ internal class PriceModelConfiguration : IEntityTypeConfiguration<Price>
 {
     public void Configure(EntityTypeBuilder<Price> builder)
     {
-        builder.ToTable("dbo.prices");
+        builder.Property(p => p.Amount)
+            .HasPrecision(precision: 14, scale: 6);
     }
 }

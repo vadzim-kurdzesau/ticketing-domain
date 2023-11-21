@@ -15,13 +15,22 @@ public class EventContext : DbContext
 
     public DbSet<Venue> Venues { get; set; }
 
+    public DbSet<Section> Sections { get; set; }
+
+    public DbSet<Row> Rows { get; set; }
+
+    public DbSet<Seat> Seats { get; set; }
+
+    public DbSet<Price> Prices { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfiguration(new EventModelConfiguration());
-        modelBuilder.ApplyConfiguration(new VenueModelConfiguration());
-        modelBuilder.ApplyConfiguration(new SectionModelConfiguration());
-        modelBuilder.ApplyConfiguration(new RowModelConfiguration());
-        modelBuilder.ApplyConfiguration(new SeatRowsConfiguration());
-        modelBuilder.ApplyConfiguration(new PriceModelConfiguration());
+        modelBuilder
+            .ApplyConfiguration(new EventModelConfiguration())
+            .ApplyConfiguration(new VenueModelConfiguration())
+            .ApplyConfiguration(new SectionModelConfiguration())
+            .ApplyConfiguration(new RowModelConfiguration())
+            .ApplyConfiguration(new SeatRowsConfiguration())
+            .ApplyConfiguration(new PriceModelConfiguration());
     }
 }

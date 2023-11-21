@@ -14,9 +14,9 @@ public class Row
     public int Id { get; set; }
 
     /// <summary>
-    /// The name of the row.
+    /// The number of the row.
     /// </summary>
-    public string Name { get; set; } = null!;
+    public int Number { get; set; }
 
     /// <summary>
     /// The identifier of the section containing this row.
