@@ -9,7 +9,7 @@ namespace IWent.Persistence.Models;
 public class Section
 {
     /// <summary>
-    /// The unique identifier of the venue.
+    /// The unique identifier of the section.
     /// </summary>
     public int Id { get; set; }
 
