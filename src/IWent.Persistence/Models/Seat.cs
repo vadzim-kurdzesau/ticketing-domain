@@ -23,7 +23,7 @@ public class Seat
     /// <summary>
     /// The row containing this seat.
     /// </summary>
-    public Row? Row { get; set; }
+    public Row Row { get; set; } = null!;
 
     /// <summary>
     /// The state of the seat.

@@ -13,37 +13,40 @@ namespace IWent.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class VenuesController : ControllerBase
+public class EventsController : ControllerBase
 {
     private readonly EventContext _eventContext;
     private readonly IMapper _mapper;
 
-    public VenuesController(EventContext eventContext, IMapper mapper)
+    public EventsController(EventContext eventContext, IMapper mapper)
     {
         _eventContext = eventContext;
         _mapper = mapper;
     }
 
     [HttpGet]
-    public async Task<IEnumerable<Venue>> GetVenues([FromQuery] PaginationParameters parameters, CancellationToken cancellationToken)
+    public async Task<IEnumerable<Event>> GetEvents([FromQuery] PaginationParameters parameters, CancellationToken cancellationToken)
     {
-        var venues = await _eventContext.Venues.OrderBy(v => v.Name)
+        var events = await _eventContext.Events.OrderByDescending(e => e.Date)
             .Skip((parameters.Page - 1) * parameters.Size)
             .Take(parameters.Size)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
-        return _mapper.Map<IEnumerable<Venue>>(venues);
+        return _mapper.Map<IEnumerable<Event>>(events);
     }
 
-    [HttpGet("{venueId}/sections")]
-    public async Task<IEnumerable<Section>> GetSections(int venueId, CancellationToken cancellationToken)
+
+    [HttpGet("{eventId}/sections/{sectionId}/seats")]
+    public async Task<IEnumerable<Seat>> GetSections(int eventId, int sectionId, CancellationToken cancellationToken)
     {
-        var sections = await _eventContext.Sections
-            .Where(s => s.VenueId == venueId)
+        var seats = await _eventContext.Seats
+            .Include(s => s.Row)
+            .Include(s => s.Price)
+            .Where(s => s.Row.SectionId == sectionId)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
-        return _mapper.Map<IEnumerable<Section>>(sections);
+        return _mapper.Map<IEnumerable<Seat>>(seats);
     }
 }
