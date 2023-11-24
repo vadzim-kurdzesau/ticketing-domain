@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace IWent.Persistence.Models;
+namespace IWent.Persistence.Entities;
 
 /// <summary>
 /// Represents a physical row of seats within a section.

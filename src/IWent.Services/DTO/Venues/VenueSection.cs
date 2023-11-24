@@ -1,6 +1,9 @@
-﻿namespace IWent.Api.Models;
+﻿namespace IWent.Services.DTO.Venues;
 
-public class Section
+/// <summary>
+/// Represents a physical group of seats of a same type.
+/// </summary>
+public class VenueSection
 {
     /// <summary>
     /// The unique identifier of the section.
@@ -11,11 +14,6 @@ public class Section
     /// The name of this section.
     /// </summary>
     public string Name { get; set; } = null!;
-
-    /// <summary>
-    /// The identifier of the venue containing this section.
-    /// </summary>
-    public int VenueId { get; set; }
 
     /// <summary>
     /// The type of seats in this section.

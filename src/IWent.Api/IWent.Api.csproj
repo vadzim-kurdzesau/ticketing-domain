@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IWent.Cart\IWent.Cart.csproj" />
-    <ProjectReference Include="..\IWent.Persistence\IWent.Persistence.csproj" />
+    <ProjectReference Include="..\IWent.Services\IWent.Services.csproj" />
   </ItemGroup>
 
 </Project>

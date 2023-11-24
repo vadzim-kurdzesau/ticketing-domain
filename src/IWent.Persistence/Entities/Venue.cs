@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace IWent.Persistence.Models;
+namespace IWent.Persistence.Entities;
 
 /// <summary>
 /// Represents a physical place where an event is happening.

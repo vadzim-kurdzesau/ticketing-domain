@@ -1,5 +1,6 @@
 using IWent.Api.Mapping;
 using IWent.Persistence;
+using IWent.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -28,6 +29,8 @@ public class Program
             options.UseSqlServer(configuration.GetConnectionString("Default"))
                 .UseSnakeCaseNamingConvention();
         });
+
+        builder.Services.AddScoped<IVenueService, VenueService>();
 
         builder.Services.AddAutoMapper(configuration =>
         {

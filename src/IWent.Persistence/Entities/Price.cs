@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace IWent.Persistence.Models;
+namespace IWent.Persistence.Entities;
 
 /// <summary>
 /// Represents an offer single or multiple seats must be sold for.

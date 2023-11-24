@@ -1,4 +1,4 @@
-﻿namespace IWent.Persistence.Models;
+﻿namespace IWent.Persistence.Entities;
 
 /// <summary>
 /// A state of a seat.

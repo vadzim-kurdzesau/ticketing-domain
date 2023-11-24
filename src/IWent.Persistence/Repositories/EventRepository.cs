@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using IWent.Persistence.Models;
+using IWent.Persistence.Entities;
 using IWent.Persistence.Repositories.Exceptions;
 using Microsoft.EntityFrameworkCore;
 

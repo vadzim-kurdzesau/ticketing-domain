@@ -1,5 +1,5 @@
-﻿using IWent.Persistence.ModelConfigurations;
-using IWent.Persistence.Models;
+﻿using IWent.Persistence.Entities;
+using IWent.Persistence.EntityConfigurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace IWent.Persistence;

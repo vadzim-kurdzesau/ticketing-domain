@@ -1,4 +1,4 @@
-﻿namespace IWent.Persistence.Models;
+﻿namespace IWent.Services.DTO.Venues;
 
 /// <summary>
 /// The type of seats in a section.

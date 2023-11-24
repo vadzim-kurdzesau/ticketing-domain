@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace IWent.Persistence.Models;
+namespace IWent.Persistence.Entities;
 
 /// <summary>
 /// Represents an occurrence in time, such as a sports event.

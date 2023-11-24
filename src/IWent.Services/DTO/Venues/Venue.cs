@@ -1,4 +1,4 @@
-﻿namespace IWent.Api.Models;
+﻿namespace IWent.Services.DTO.Venues;
 
 /// <summary>
 /// Represents a physical place where an event is happening.

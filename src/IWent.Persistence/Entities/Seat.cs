@@ -1,4 +1,4 @@
-﻿namespace IWent.Persistence.Models;
+﻿namespace IWent.Persistence.Entities;
 
 /// <summary>
 /// Represents the smallest manifest unit that can be purchased or booked.

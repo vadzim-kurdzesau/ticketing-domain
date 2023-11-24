@@ -1,13 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
-using IWent.Api.Models;
 using IWent.Api.Parameters;
-using IWent.Persistence;
+using IWent.Services;
+using IWent.Services.DTO.Venues;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace IWent.Api.Controllers;
 
@@ -15,35 +12,22 @@ namespace IWent.Api.Controllers;
 [Route("api/[controller]")]
 public class VenuesController : ControllerBase
 {
-    private readonly EventContext _eventContext;
-    private readonly IMapper _mapper;
+    private readonly IVenueService _venueService;
 
-    public VenuesController(EventContext eventContext, IMapper mapper)
+    public VenuesController(IVenueService venueService)
     {
-        _eventContext = eventContext;
-        _mapper = mapper;
+        _venueService = venueService;
     }
 
     [HttpGet]
-    public async Task<IEnumerable<Venue>> GetVenues([FromQuery] PaginationParameters parameters, CancellationToken cancellationToken)
+    public Task<IEnumerable<Venue>> GetVenues([FromQuery] PaginationParameters parameters, CancellationToken cancellationToken)
     {
-        var venues = await _eventContext.Venues.OrderBy(v => v.Name)
-            .Skip((parameters.Page - 1) * parameters.Size)
-            .Take(parameters.Size)
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
-
-        return _mapper.Map<IEnumerable<Venue>>(venues);
+        return _venueService.GetVenuesAsync(parameters.Page, parameters.Size, cancellationToken);
     }
 
     [HttpGet("{venueId}/sections")]
-    public async Task<IEnumerable<Section>> GetSections(int venueId, CancellationToken cancellationToken)
+    public Task<IEnumerable<VenueSection>> GetSections(int venueId, CancellationToken cancellationToken)
     {
-        var sections = await _eventContext.Sections
-            .Where(s => s.VenueId == venueId)
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
-
-        return _mapper.Map<IEnumerable<Section>>(sections);
+        return _venueService.GetSectionsAsync(venueId, cancellationToken);
     }
 }
