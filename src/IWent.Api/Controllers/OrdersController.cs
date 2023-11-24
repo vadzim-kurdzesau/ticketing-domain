@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using IWent.Api.Models;
-using IWent.Api.Models.Cart;
+using IWent.Api.Models.Payments;
 using IWent.Cart;
 using Microsoft.AspNetCore.Mvc;
 

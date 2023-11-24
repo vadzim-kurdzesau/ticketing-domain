@@ -1,4 +1,4 @@
-﻿namespace IWent.Api.Models.Cart;
+﻿namespace IWent.Api.Models.Payments;
 
 public class CartSeat
 {
