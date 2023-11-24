@@ -1,4 +1,6 @@
-﻿namespace IWent.Services.DTO.Venues;
+﻿using IWent.Services.DTO.Common;
+
+namespace IWent.Services.DTO.Venues;
 
 /// <summary>
 /// Represents a physical place where an event is happening.
@@ -16,22 +18,7 @@ public class Venue
     public string Name { get; set; } = null!;
 
     /// <summary>
-    /// The county name where this venue is located.
+    /// The location of this venue.
     /// </summary>
-    public string Country { get; set; } = null!;
-
-    /// <summary>
-    /// The region where this venue is located.
-    /// </summary>
-    public string? Region { get; set; }
-
-    /// <summary>
-    /// The city where this venue is located.
-    /// </summary>
-    public string City { get; set; } = null!;
-
-    /// <summary>
-    /// The street on which this venue is located.
-    /// </summary>
-    public string Street { get; set; } = null!;
+    public Address Address { get; set; } = null!;
 }

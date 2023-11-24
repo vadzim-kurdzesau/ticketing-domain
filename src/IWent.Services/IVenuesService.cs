@@ -5,7 +5,7 @@ namespace IWent.Services;
 /// <summary>
 /// Provides functionality for API to operate with venues.
 /// </summary>
-public interface IVenueService
+public interface IVenuesService
 {
     /// <summary>
     /// Gets the specified <paramref name="amount"/> of venues starting from the specified <paramref name="page"/>.

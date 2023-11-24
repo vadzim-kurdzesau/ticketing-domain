@@ -12,9 +12,9 @@ namespace IWent.Api.Controllers;
 [Route("api/[controller]")]
 public class VenuesController : ControllerBase
 {
-    private readonly IVenueService _venueService;
+    private readonly IVenuesService _venueService;
 
-    public VenuesController(IVenueService venueService)
+    public VenuesController(IVenuesService venueService)
     {
         _venueService = venueService;
     }

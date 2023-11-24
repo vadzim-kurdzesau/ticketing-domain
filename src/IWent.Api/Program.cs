@@ -30,7 +30,8 @@ public class Program
                 .UseSnakeCaseNamingConvention();
         });
 
-        builder.Services.AddScoped<IVenueService, VenueService>();
+        builder.Services.AddScoped<IVenuesService, VenuesService>();
+        builder.Services.AddScoped<IEventsService, EventsService>();
 
         builder.Services.AddAutoMapper(configuration =>
         {
