@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
 using IWent.Api.Models;
 using IWent.Api.Models.Payments;
 using IWent.Cart;
@@ -15,19 +14,16 @@ namespace IWent.Api.Controllers;
 public class OrdersController : ControllerBase
 {
     private readonly ICartService _cartService;
-    private readonly IMapper _mapper;
 
-    public OrdersController(ICartService cartService, IMapper mapper)
+    public OrdersController(ICartService cartService)
     {
         _cartService = cartService;
-        _mapper = mapper;
     }
 
     [HttpGet("carts/{cartId}")]
     public IEnumerable<OrderItem> GetCartItems(string cartId, CancellationToken cancellationToken)
     {
-        var userCart = _cartService.GetUserCart(cartId);
-        return _mapper.Map<IEnumerable<OrderItem>>(userCart);
+        throw new NotImplementedException();
     }
 
     [HttpPost("carts/{cartId}")]

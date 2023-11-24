@@ -1,4 +1,3 @@
-using IWent.Api.Mapping;
 using IWent.Persistence;
 using IWent.Services;
 using Microsoft.AspNetCore.Builder;
@@ -32,11 +31,6 @@ public class Program
 
         builder.Services.AddScoped<IVenuesService, VenuesService>();
         builder.Services.AddScoped<IEventsService, EventsService>();
-
-        builder.Services.AddAutoMapper(configuration =>
-        {
-            configuration.AddProfile<EventMappingProfile>();
-        });
 
         var app = builder.Build();
 
