@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace IWent.Persistence.EntityConfigurations;
 
-internal class SectionModelConfiguration : IEntityTypeConfiguration<Section>
+internal class SectionEntityConfiguration : IEntityTypeConfiguration<Section>
 {
     public void Configure(EntityTypeBuilder<Section> builder)
     {

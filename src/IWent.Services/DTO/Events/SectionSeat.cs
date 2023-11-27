@@ -1,4 +1,6 @@
-﻿namespace IWent.Services.DTO.Events;
+﻿using System.Collections.Generic;
+
+namespace IWent.Services.DTO.Events;
 
 /// <summary>
 /// Represents the smallest manifest unit that can be purchased or booked.
@@ -33,5 +35,5 @@ public class SectionSeat
     /// <summary>
     /// The available price options for this seat.
     /// </summary>
-    public IEnumerable<PriceOption>? PriceOptions { get; set; }
+    public IEnumerable<PriceOption> PriceOptions { get; set; } = null!;
 }

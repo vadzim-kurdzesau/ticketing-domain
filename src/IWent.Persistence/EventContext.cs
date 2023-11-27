@@ -23,14 +23,17 @@ public class EventContext : DbContext
 
     public DbSet<Price> Prices { get; set; }
 
+    public DbSet<Payment> Payments { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
-            .ApplyConfiguration(new EventModelConfiguration())
-            .ApplyConfiguration(new VenueModelConfiguration())
-            .ApplyConfiguration(new SectionModelConfiguration())
-            .ApplyConfiguration(new RowModelConfiguration())
-            .ApplyConfiguration(new SeatRowsConfiguration())
-            .ApplyConfiguration(new PriceModelConfiguration());
+            .ApplyConfiguration(new EventEntityConfiguration())
+            .ApplyConfiguration(new VenueEntityConfiguration())
+            .ApplyConfiguration(new SectionEntityConfiguration())
+            .ApplyConfiguration(new RowEntityConfiguration())
+            .ApplyConfiguration(new SeatEntityConfiguration())
+            .ApplyConfiguration(new PriceEntityConfiguration())
+            .ApplyConfiguration(new OrderItemEntityConfiguration());
     }
 }

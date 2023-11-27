@@ -1,4 +1,7 @@
-﻿namespace IWent.Persistence.Entities;
+﻿using System;
+using System.Collections.Generic;
+
+namespace IWent.Persistence.Entities;
 
 /// <summary>
 /// Represents the smallest manifest unit that can be purchased or booked.
@@ -31,12 +34,7 @@ public class Seat
     public SeatState State { get; set; }
 
     /// <summary>
-    /// The identifier of the price offer for which this seat is being sold.
+    /// The price offers for which this seat is being sold.
     /// </summary>
-    public int PriceId { get; set; }
-
-    /// <summary>
-    /// The price offer for which this seat is being sold.
-    /// </summary>
-    public Price Price { get; set; } = null!;
+    public IEnumerable<Price> PriceOptions { get; set; } = Array.Empty<Price>();
 }

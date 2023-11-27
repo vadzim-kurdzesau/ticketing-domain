@@ -4,6 +4,7 @@ using IWent.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IWent.Persistence.Migrations
 {
     [DbContext(typeof(EventContext))]
-    partial class EventContextModelSnapshot : ModelSnapshot
+    [Migration("20231127185116_MakeSeatToPriceManyToMany")]
+    partial class MakeSeatToPriceManyToMany
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,60 +55,6 @@ namespace IWent.Persistence.Migrations
                         .HasDatabaseName("ix_events_venue_id");
 
                     b.ToTable("events", (string)null);
-                });
-
-            modelBuilder.Entity("IWent.Persistence.Entities.OrderItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("PaymentId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("payment_id");
-
-                    b.Property<int>("PriceId")
-                        .HasColumnType("int")
-                        .HasColumnName("price_id");
-
-                    b.Property<int>("SeatId")
-                        .HasColumnType("int")
-                        .HasColumnName("seat_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_order_item");
-
-                    b.HasIndex("PaymentId")
-                        .HasDatabaseName("ix_order_item_payment_id");
-
-                    b.HasIndex("PriceId")
-                        .HasDatabaseName("ix_order_item_price_id");
-
-                    b.HasIndex("SeatId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_order_item_seat_id");
-
-                    b.ToTable("order_item", (string)null);
-                });
-
-            modelBuilder.Entity("IWent.Persistence.Entities.Payment", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("id");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int")
-                        .HasColumnName("status");
-
-                    b.HasKey("Id")
-                        .HasName("pk_payments");
-
-                    b.ToTable("payments", (string)null);
                 });
 
             modelBuilder.Entity("IWent.Persistence.Entities.Price", b =>
@@ -296,36 +245,6 @@ namespace IWent.Persistence.Migrations
                     b.Navigation("Venue");
                 });
 
-            modelBuilder.Entity("IWent.Persistence.Entities.OrderItem", b =>
-                {
-                    b.HasOne("IWent.Persistence.Entities.Payment", "Payment")
-                        .WithMany("OrderItems")
-                        .HasForeignKey("PaymentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_order_item_payments_payment_id");
-
-                    b.HasOne("IWent.Persistence.Entities.Price", "Price")
-                        .WithMany()
-                        .HasForeignKey("PriceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_order_item_prices_price_id");
-
-                    b.HasOne("IWent.Persistence.Entities.Seat", "Seat")
-                        .WithOne()
-                        .HasForeignKey("IWent.Persistence.Entities.OrderItem", "SeatId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_order_item_seats_seat_id");
-
-                    b.Navigation("Payment");
-
-                    b.Navigation("Price");
-
-                    b.Navigation("Seat");
-                });
-
             modelBuilder.Entity("IWent.Persistence.Entities.Row", b =>
                 {
                     b.HasOne("IWent.Persistence.Entities.Section", "Section")
@@ -377,11 +296,6 @@ namespace IWent.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_price_seat_seats_seats_id");
-                });
-
-            modelBuilder.Entity("IWent.Persistence.Entities.Payment", b =>
-                {
-                    b.Navigation("OrderItems");
                 });
 
             modelBuilder.Entity("IWent.Persistence.Entities.Row", b =>

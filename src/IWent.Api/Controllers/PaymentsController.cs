@@ -1,7 +1,7 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using IWent.Api.Models.Payments;
+using IWent.Services;
+using IWent.Services.Orders;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IWent.Api.Controllers;
@@ -10,21 +10,30 @@ namespace IWent.Api.Controllers;
 [Route("api/[controller]")]
 public class PaymentsController : ControllerBase
 {
+    private readonly IPaymentService _paymentService;
+
+    public PaymentsController(IPaymentService paymentService)
+    {
+        _paymentService = paymentService;
+    }
+
     [HttpGet]
     public Task<PaymentInfo> GetPaymentInfo(string paymentId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return _paymentService.GetPaymentInfoAsync(paymentId, cancellationToken);
     }
 
     [HttpPost("{paymentId}/complete")]
-    public Task<IActionResult> CompleteOrderPayment(string paymentId, CancellationToken cancellationToken)
+    public async Task<IActionResult> CompleteOrderPayment(string paymentId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        await _paymentService.CompletePaymentAsync(paymentId, cancellationToken);
+        return Ok();
     }
 
     [HttpPost("{paymentId}/failed")]
-    public Task<IActionResult> FailOrderPayment(string paymentId, CancellationToken cancellationToken)
+    public async Task<IActionResult> FailOrderPayment(string paymentId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        await _paymentService.FailOrderPaymentAsync(paymentId, cancellationToken);
+        return Ok();
     }
 }

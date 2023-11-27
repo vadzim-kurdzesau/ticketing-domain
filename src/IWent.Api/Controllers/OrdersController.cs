@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using IWent.Api.Models;
-using IWent.Api.Models.Payments;
-using IWent.Cart;
+using IWent.Services.DTO;
+using IWent.Services.DTO.Orders;
+using IWent.Services.Exceptions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IWent.Api.Controllers;
@@ -13,34 +13,62 @@ namespace IWent.Api.Controllers;
 [Route("api/[controller]")]
 public class OrdersController : ControllerBase
 {
-    private readonly ICartService _cartService;
+    private readonly IOrdersService _cartService;
 
-    public OrdersController(ICartService cartService)
+    public OrdersController(IOrdersService cartService)
     {
         _cartService = cartService;
     }
 
     [HttpGet("carts/{cartId}")]
-    public IEnumerable<OrderItem> GetCartItems(string cartId, CancellationToken cancellationToken)
+    public IEnumerable<OrderItem> GetCartItems(string cartId)
     {
-        throw new NotImplementedException();
+        return _cartService.GetItemsInCart(cartId);
     }
 
     [HttpPost("carts/{cartId}")]
-    public Task<CartState> AddToCart(string cartId, CartSeat item, CancellationToken cancellationToken)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public IActionResult AddToCart(string cartId, OrderItem item)
     {
-        throw new NotImplementedException();
+        try
+        {
+            return Ok(_cartService.AddToCart(cartId, item));
+        }
+        catch (CartAlreadyExistsException ex)
+        {
+            return Conflict(ex.Message);
+        }
     }
 
     [HttpDelete("carts/{cartId}/events/{eventId}/seats/{seatId}")]
-    public Task<IActionResult> RemoveFromCart(string cartId, int eventId, int seatId, CancellationToken cancellationToken)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public IActionResult RemoveFromCart(string cartId, int eventId, int seatId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            _cartService.RemoveFromCart(cartId, eventId, seatId);
+            return Ok();
+        }
+        catch (ApiException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPut("carts/{cartId}/book")]
-    public Task<IActionResult> BookSeats(string cartId, CancellationToken cancellationToken)
+    public async Task<IActionResult> BookSeats(string cartId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var paymentInfo = await _cartService.BookSeatsAsync(cartId, cancellationToken);
+            return Ok(paymentInfo);
+        }
+        catch (CartIsEmptyException)
+        {
+
+            throw;
+        }
     }
 }

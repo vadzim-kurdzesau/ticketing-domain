@@ -1,4 +1,5 @@
-﻿using IWent.Services.DTO.Common;
+﻿using System;
+using IWent.Services.DTO.Common;
 
 namespace IWent.Services.DTO.Events;
 

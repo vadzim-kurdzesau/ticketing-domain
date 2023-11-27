@@ -1,5 +1,8 @@
+using IWent.Api.Filters;
 using IWent.Persistence;
 using IWent.Services;
+using IWent.Services.DTO;
+using IWent.Services.Orders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,7 +19,11 @@ public class Program
 
         // Add services to the container.
 
-        builder.Services.AddControllers();
+        builder.Services.AddControllers(options =>
+        {
+            options.Filters.Add<ResourceNotFoundResponseExceptionFilter>();
+        });
+
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
@@ -31,6 +38,9 @@ public class Program
 
         builder.Services.AddScoped<IVenuesService, VenuesService>();
         builder.Services.AddScoped<IEventsService, EventsService>();
+        builder.Services.AddScoped<IOrdersService, CartService>();
+        builder.Services.AddScoped<IPaymentService, PaymentService>();
+        builder.Services.AddSingleton<ICartStorage, CartStorage>();
 
         var app = builder.Build();
 

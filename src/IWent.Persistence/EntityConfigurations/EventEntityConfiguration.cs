@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace IWent.Persistence.EntityConfigurations;
 
-internal class EventModelConfiguration : IEntityTypeConfiguration<Event>
+internal class EventEntityConfiguration : IEntityTypeConfiguration<Event>
 {
     public void Configure(EntityTypeBuilder<Event> builder)
     {

@@ -1,4 +1,8 @@
-﻿using IWent.Persistence;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using IWent.Persistence;
 using IWent.Services.DTO.Common;
 using IWent.Services.DTO.Events;
 using Microsoft.EntityFrameworkCore;
@@ -29,7 +33,7 @@ public class EventsService : IEventsService
     {
         var seats = await _eventContext.Seats
             .Include(s => s.Row)
-            .Include(s => s.Price)
+            .Include(s => s.PriceOptions)
             .Where(s => s.Row.SectionId == sectionId)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
@@ -60,13 +64,10 @@ public class EventsService : IEventsService
             SeatId = seat.Id,
             Number = seat.Number,
             State = (SeatState)seat.State,
-            PriceOptions = new PriceOption[]
+            PriceOptions = seat.PriceOptions.Select(o => new PriceOption
             {
-               new PriceOption
-               {
-                   Id = seat.PriceId,
-                   Name = seat.Price.Name,
-               }
-            }
+                Id = o.Id,
+                Name = o.Name,
+            }).ToArray(),
         };
 }

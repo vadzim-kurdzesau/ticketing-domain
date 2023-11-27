@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace IWent.Persistence.EntityConfigurations;
 
-internal class RowModelConfiguration : IEntityTypeConfiguration<Row>
+internal class RowEntityConfiguration : IEntityTypeConfiguration<Row>
 {
     public void Configure(EntityTypeBuilder<Row> builder)
     {

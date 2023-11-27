@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace IWent.Persistence.EntityConfigurations;
 
-internal class PriceModelConfiguration : IEntityTypeConfiguration<Price>
+internal class PriceEntityConfiguration : IEntityTypeConfiguration<Price>
 {
     public void Configure(EntityTypeBuilder<Price> builder)
     {
