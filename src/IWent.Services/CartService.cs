@@ -61,21 +61,42 @@ public class CartService : IOrdersService
             throw new CartIsEmptyException($"Cart '{cartId}' is empty.");
         }
 
-        var seatIds = cartSeats.Select(s => s.SeatId);
+        var seatIds = cartSeats.ToDictionary(s => s.SeatId);
 
-        var seats = _eventContext.Seats
-            .Where(s => seatIds.Contains(s.Id));
-
-        foreach (var seat in seats)
+        Payment order;
+        using (var transaction = _eventContext.Database.BeginTransaction())
         {
-            seat.State = SeatState.Booked;
-        }
+            var seats = _eventContext.Seats
+                .Where(s => seatIds.Keys.Contains(s.Id));
 
-        await _eventContext.SaveChangesAsync(cancellationToken);
+            foreach (var seat in seats)
+            {
+                seat.State = SeatState.Booked;
+            }
+
+            order = new Payment
+            {
+                Id = Guid.NewGuid().ToString(),
+                Status = Persistence.Entities.PaymentStatus.Pending,
+                OrderItems = seats.Select(s => new Persistence.Entities.OrderItem
+                {
+                    SeatId = s.Id,
+                    PriceId = seatIds[s.Id].PriceId,
+                }),
+            };
+
+            await _eventContext.SaveChangesAsync(cancellationToken);
+
+            transaction.Commit();
+        }
 
         _cartStorage.Remove(cartId);
 
-        throw new NotImplementedException();
+        return new PaymentInfo
+        {
+            PaymentId = order.Id,
+            Status = (Orders.PaymentStatus)order.Status,
+        };
     }
 
     private static DTO.Orders.OrderItem ToDTO(in CartItem item)
