@@ -36,5 +36,5 @@ public class Section
     /// <summary>
     /// The list this section's rows.
     /// </summary>
-    public IEnumerable<Row> Rows { get; set; } = Array.Empty<Row>();
+    public IEnumerable<Row> Rows { get; set; } = null!;
 }

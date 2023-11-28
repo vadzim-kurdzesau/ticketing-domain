@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace IWent.Persistence.Entities;
 
@@ -44,7 +43,7 @@ public class Venue
     public IEnumerable<Section> Sections { get; set; } = null!;
 
     /// <summary>
-    /// The events 
+    /// The events that are happenig in this venue.
     /// </summary>
-    public IEnumerable<Event> Events { get; set; } = Array.Empty<Event>();
+    public IEnumerable<Event> Events { get; set; } = null!;
 }

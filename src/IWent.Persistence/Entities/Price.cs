@@ -26,5 +26,5 @@ public class Price
     /// <summary>
     /// The list of seats with this price offer.
     /// </summary>
-    public IEnumerable<Seat> Seats { get; set; } = Array.Empty<Seat>();
+    public IEnumerable<Seat> Seats { get; set; } = null!;
 }

@@ -83,9 +83,10 @@ public class CartService : ICartService
                 {
                     SeatId = s.Id,
                     PriceId = seatIds[s.Id].PriceId,
-                }),
+                }).ToList(),
             };
 
+            _eventContext.Payments.Add(order);
             await _eventContext.SaveChangesAsync(cancellationToken);
 
             transaction.Commit();

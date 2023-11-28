@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace IWent.Persistence.Entities;
 
@@ -31,5 +30,5 @@ public class Row
     /// <summary>
     /// The list this row's seats.
     /// </summary>
-    public IEnumerable<Seat> Seats { get; set; } = Array.Empty<Seat>();
+    public IEnumerable<Seat> Seats { get; set; } = null!;
 }

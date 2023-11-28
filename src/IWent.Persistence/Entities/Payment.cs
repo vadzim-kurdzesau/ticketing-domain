@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace IWent.Persistence.Entities;
 
 /// <summary>
-/// 
+/// Represents the user's order.
 /// </summary>
 public class Payment
 {
@@ -19,7 +18,7 @@ public class Payment
     public PaymentStatus Status { get; set; }
 
     /// <summary>
-    /// 
+    /// The items in this order.
     /// </summary>
-    public IEnumerable<OrderItem> OrderItems { get; set; } = Array.Empty<OrderItem>();
+    public ICollection<OrderItem> OrderItems { get; set; } = null!;
 }

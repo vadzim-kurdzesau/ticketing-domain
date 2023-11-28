@@ -36,5 +36,5 @@ public class Seat
     /// <summary>
     /// The price offers for which this seat is being sold.
     /// </summary>
-    public IEnumerable<Price> PriceOptions { get; set; } = Array.Empty<Price>();
+    public IEnumerable<Price> PriceOptions { get; set; } = null!;
 }

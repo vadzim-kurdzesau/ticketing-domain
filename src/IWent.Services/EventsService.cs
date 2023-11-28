@@ -23,6 +23,7 @@ public class EventsService : IEventsService
         var events = await _eventContext.Events.OrderByDescending(e => e.Date)
             .Skip((page - 1) * amount)
             .Take(amount)
+            .Include(e => e.Venue)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
