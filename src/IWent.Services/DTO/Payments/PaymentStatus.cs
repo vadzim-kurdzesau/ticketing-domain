@@ -1,4 +1,4 @@
-﻿namespace IWent.Services.Orders;
+﻿namespace IWent.Services.DTO.Payments;
 
 /// <summary>
 /// Indicates the current order payment status.

@@ -7,12 +7,13 @@ using IWent.Persistence;
 using IWent.Persistence.Entities;
 using IWent.Services.DTO;
 using IWent.Services.DTO.Orders;
+using IWent.Services.DTO.Payments;
 using IWent.Services.Exceptions;
-using IWent.Services.Orders;
+using IWent.Services.Extensions;
 
-namespace IWent.Services;
+namespace IWent.Services.Cart;
 
-public class CartService : IOrdersService
+public class CartService : ICartService
 {
     private readonly ICartStorage _cartStorage;
     private readonly EventContext _eventContext;
@@ -95,7 +96,7 @@ public class CartService : IOrdersService
         return new PaymentInfo
         {
             PaymentId = order.Id,
-            Status = (Orders.PaymentStatus)order.Status,
+            Status = order.Status.ToDTO(),
         };
     }
 

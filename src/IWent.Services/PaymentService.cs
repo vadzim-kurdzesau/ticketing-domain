@@ -2,8 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using IWent.Persistence;
+using IWent.Services.DTO.Payments;
 using IWent.Services.Exceptions;
-using IWent.Services.Orders;
+using IWent.Services.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace IWent.Services;
@@ -28,15 +29,23 @@ public class PaymentService : IPaymentService
         return new PaymentInfo
         {
             PaymentId = paymentId,
-            Status = (PaymentStatus)payment.Status,
+            Status = payment.Status.ToDTO(),
         };
     }
 
     public Task CompletePaymentAsync(string paymentId, CancellationToken cancellationToken)
-        => ChangePaymentStatusAsync(paymentId, Persistence.Entities.PaymentStatus.Completed, Persistence.Entities.SeatState.Sold, cancellationToken);
+        => ChangePaymentStatusAsync(
+            paymentId,
+            newPaymentStatus: Persistence.Entities.PaymentStatus.Completed,
+            newSeatState: Persistence.Entities.SeatState.Sold,
+            cancellationToken);
 
     public Task FailOrderPaymentAsync(string paymentId, CancellationToken cancellationToken)
-        => ChangePaymentStatusAsync(paymentId, Persistence.Entities.PaymentStatus.Failed, Persistence.Entities.SeatState.Available, cancellationToken);
+        => ChangePaymentStatusAsync(
+            paymentId,
+            newPaymentStatus: Persistence.Entities.PaymentStatus.Failed,
+            newSeatState: Persistence.Entities.SeatState.Available,
+            cancellationToken);
 
     private async Task ChangePaymentStatusAsync(
         string paymentId,
@@ -44,22 +53,32 @@ public class PaymentService : IPaymentService
         Persistence.Entities.SeatState newSeatState,
         CancellationToken cancellationToken)
     {
-        var payment = await _eventContext.Payments.Where(p => p.Id == paymentId)
-            .Include(p => p.OrderItems)
-            .ThenInclude(p => p.Seat)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (payment == null)
+        using (var transaction = _eventContext.Database.BeginTransaction())
         {
-            throw new ResourceDoesNotExistException($"Payment with the ID '{paymentId}' does not exist.");
-        }
+            var payment = await _eventContext.Payments.Where(p => p.Id == paymentId)
+                .Include(p => p.OrderItems)
+                .ThenInclude(p => p.Seat)
+                .FirstOrDefaultAsync(cancellationToken);
 
-        payment.Status = newPaymentStatus;
-        foreach (var orderItem in payment.OrderItems)
-        {
-            orderItem.Seat.State = newSeatState;
-        }
+            if (payment == null)
+            {
+                throw new ResourceDoesNotExistException($"Payment with the ID '{paymentId}' does not exist.");
+            }
 
-        await _eventContext.SaveChangesAsync(cancellationToken);
+            if (payment.Status != Persistence.Entities.PaymentStatus.Pending)
+            {
+                throw new CannotChangePaymentStatusException("Cannot change status of a non-pending payment.");
+            }
+
+            payment.Status = newPaymentStatus;
+            foreach (var orderItem in payment.OrderItems)
+            {
+                orderItem.Seat.State = newSeatState;
+            }
+
+            await _eventContext.SaveChangesAsync(cancellationToken);
+
+            transaction.Commit();
+        }
     }
 }

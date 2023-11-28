@@ -1,9 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace IWent.Services.Orders;
+﻿namespace IWent.Services.Cart;
 
 /// <summary>
-/// 
+/// Defines the way to access user carts.
 /// </summary>
 public interface ICartStorage
 {

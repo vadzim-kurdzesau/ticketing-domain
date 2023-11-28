@@ -1,8 +1,7 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 using IWent.Services.Exceptions;
 
-namespace IWent.Services.Orders;
+namespace IWent.Services.Cart;
 
 public class InMemoryCartStorage : ICartStorage
 {

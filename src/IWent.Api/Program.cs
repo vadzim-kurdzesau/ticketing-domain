@@ -1,8 +1,8 @@
 using IWent.Api.Filters;
 using IWent.Persistence;
 using IWent.Services;
+using IWent.Services.Cart;
 using IWent.Services.DTO;
-using IWent.Services.Orders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -38,9 +38,9 @@ public class Program
 
         builder.Services.AddScoped<IVenuesService, VenuesService>();
         builder.Services.AddScoped<IEventsService, EventsService>();
-        builder.Services.AddScoped<IOrdersService, CartService>();
+        builder.Services.AddScoped<ICartService, CartService>();
         builder.Services.AddScoped<IPaymentService, PaymentService>();
-        builder.Services.AddSingleton<ICartStorage, CartStorage>();
+        builder.Services.AddSingleton<ICartStorage, InMemoryCartStorage>();
 
         var app = builder.Build();
 

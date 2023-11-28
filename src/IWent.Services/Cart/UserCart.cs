@@ -1,19 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace IWent.Services.Orders;
+namespace IWent.Services.Cart;
 
+/// <summary>
+/// Represents a list of user order's seats.
+/// </summary>
 public class UserCart : IEnumerable<CartItem>
 {
     private readonly IDictionary<int, CartItem> _items = new Dictionary<int, CartItem>();
 
     /// <summary>
-    /// 
+    /// The unique identifier of the cart.
     /// </summary>
     public string Id { get; set; } = null!;
 
     /// <summary>
-    /// 
+    /// The number of items in the cart.
     /// </summary>
     public int ItemsTotal => _items.Count;
 

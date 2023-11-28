@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace IWent.Services.Orders;
+namespace IWent.Services.Cart;
 
 /// <summary>
-/// 
+/// Contains the user's order data.
 /// </summary>
 public readonly struct CartItem
 {

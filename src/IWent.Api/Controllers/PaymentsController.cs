@@ -1,7 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using IWent.Services;
-using IWent.Services.Orders;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IWent.Api.Controllers;
@@ -18,14 +17,24 @@ public class PaymentsController : ControllerBase
     }
 
     [HttpGet]
-    public Task<PaymentInfo> GetPaymentInfo(string paymentId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetPaymentInfo(string paymentId, CancellationToken cancellationToken)
     {
-        return _paymentService.GetPaymentInfoAsync(paymentId, cancellationToken);
+        if (string.IsNullOrWhiteSpace(paymentId))
+        {
+            return BadRequest("Payment can't be null, empty or a whitespace.");
+        }
+
+        return Ok(await _paymentService.GetPaymentInfoAsync(paymentId, cancellationToken));
     }
 
     [HttpPost("{paymentId}/complete")]
     public async Task<IActionResult> CompleteOrderPayment(string paymentId, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(paymentId))
+        {
+            return BadRequest("Payment can't be null, empty or a whitespace.");
+        }
+
         await _paymentService.CompletePaymentAsync(paymentId, cancellationToken);
         return Ok();
     }
@@ -33,6 +42,11 @@ public class PaymentsController : ControllerBase
     [HttpPost("{paymentId}/failed")]
     public async Task<IActionResult> FailOrderPayment(string paymentId, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(paymentId))
+        {
+            return BadRequest("Payment can't be null, empty or a whitespace.");
+        }
+
         await _paymentService.FailOrderPaymentAsync(paymentId, cancellationToken);
         return Ok();
     }
