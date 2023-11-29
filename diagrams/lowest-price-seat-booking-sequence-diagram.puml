@@ -7,16 +7,16 @@ boundary "Checkout Page" as checkoutPage
 participant "Events Service" as eventService
 database "Events Database" as eventsDb
 
-participant "Booking Service" as bookingService
 participant "Cart Service" as cartService
 database "Cart Cache" as cartCache
 participant "Transaction Service" as transactionService
+entity "Payment Status Tracker" as paymentTracking
 participant "Notification Service" as notifications
 queue "Message Queue" as queueService
+boundary "Payment API" as paymentApi
 
 activate eventsDb
 activate eventService
-activate bookingService
 activate cartService
 activate transactionService
 activate notifications
@@ -52,53 +52,65 @@ end
 
 
 user -> bookingPage : Book Selected Seat
-bookingPage -> bookingService : Book Seat
-bookingService -> queueService ++ : Notify Seat Has Been Booked
+bookingPage -> cartService : Add Seat to Cart
+cartService -> queueService ++ : Notify Seat Has Been Booked
 queueService -> eventService : Notify Seat Has Been Booked
-eventService --> queueService : Acknowledge
 eventService -> eventsDb : Change Seat State to 'Booked'
 eventsDb --> eventService : Operation was Successful
-
-queueService -> cartService : Notify Seat Has Been Booked
-cartService --> queueService : Acknowledge
+eventService --> queueService : Acknowledge
+queueService --> cartService : Acknowledge Seat Has Been Booked
 cartService -> cartCache ++: Add Booking to Cache
 cartCache --> cartService : Operation was Successful
-bookingService --> bookingPage : Acknowledge Booking
-
+cartService --> bookingPage : Acknowledge Booking
 bookingPage --> user -- : Display that Booking was Successful
 
 
 user -> checkoutPage ++: Open Cart
-checkoutPage -> cartService : Gets User's Cart
-cartService -> cartCache : Get User's Cart
+checkoutPage -> cartService : Get User's Cart
+cartService -> cartCache : Get User's Bookings
 cartCache --> cartService : Return User's Bookings
 cartService --> checkoutPage : Return User's Cart
 checkoutPage --> user : Display User's Cart
 
 user -> checkoutPage: Pay for Seats
 checkoutPage -> transactionService : Buy Seats
+transactionService -> paymentApi ++ : Process Payment
+paymentApi --> transactionService -- : Payment was Successful
+transactionService -> paymentTracking ++ : Create Status Tracker
+paymentTracking -> transactionService : Return Success
+transactionService --> checkoutPage : Return Payment Tracker
+paymentTracking -> checkoutPage : Notify Payment is in Progress
+checkoutPage -> checkoutPage : Display Payment Status
 transactionService -> queueService : Notify Seat Has Been Purchased
 
 queueService -> eventService : Notify Seat Has Been Purchased
 eventService --> queueService : Acknowledge
 eventService -> eventsDb : Change Seat State to 'Sold'
 eventsDb --> eventService : Operation was Successful
+eventService -> queueService : Notify Seat Status Has Changed
 
-queueService -> cartService : Notify Seat Has Been Purchased
-cartService --> queueService : Acknowledge
-cartService -> cartCache : Remove Booking from Cache
-cartCache --> cartService : Operation was Successful
-
-queueService -> notifications : Notify Seat Has Been Purchased
+queueService -> notifications : Notify Seat Status Has Changed
 notifications --> queueService : Acknowledge
 notifications -> : Send Tickets to User's Email
 notifications <-- : Receive Acknowledgement
+notifications -> queueService : Notify Tickets were Sent
+
+queueService -> transactionService : Notify Tickets were Sent
+transactionService --> queueService : Acknowledge
+transactionService -> paymentTracking : Change Payment Status to Completed
+paymentTracking --> transactionService : Return Success
+paymentTracking -> checkoutPage -- : Notify Payment was Successful
+checkoutPage -> checkoutPage : Display Payment Success
+
+queueService -> cartService : Notify Tickets were Sent
+cartService --> queueService : Acknowledge
+cartService -> cartCache : Remove Booking from Cache
+cartCache --> cartService : Operation was Successful
 
 checkoutPage --> user --: Display that Payment was Successful
 
 deactivate eventsDb
 deactivate eventService
-deactivate bookingService
 deactivate cartService
 deactivate transactionService
 deactivate notifications
