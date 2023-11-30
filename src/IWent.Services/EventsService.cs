@@ -32,10 +32,12 @@ public class EventsService : IEventsService
     
     public async Task<IEnumerable<SectionSeat>> GetSectionSeats(int eventId, int sectionId, CancellationToken cancellationToken)
     {
-        var seats = await _eventContext.Seats
-            .Include(s => s.Row)
+        var seats = await _eventContext.EventSeats
             .Include(s => s.PriceOptions)
-            .Where(s => s.Row.SectionId == sectionId)
+            .Include(s => s.Seat)
+            .ThenInclude(s => s.Row)
+            .Where(s => s.EventId == eventId)
+            .Where(s => s.Seat.Row.SectionId == sectionId)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
@@ -57,15 +59,15 @@ public class EventsService : IEventsService
             }
         };
 
-    private static SectionSeat ToDTO(Persistence.Entities.Seat seat)
+    private static SectionSeat ToDTO(Persistence.Entities.EventSeat seatStatus)
         => new SectionSeat
         {
-            SectionId = seat.Row.SectionId,
-            RowId = seat.RowId,
-            SeatId = seat.Id,
-            Number = seat.Number,
-            State = (SeatState)seat.State,
-            PriceOptions = seat.PriceOptions.Select(o => new PriceOption
+            SectionId = seatStatus.Seat.Row.SectionId,
+            RowId = seatStatus.Seat.RowId,
+            SeatId = seatStatus.SeatId,
+            Number = seatStatus.Seat.Number,
+            State = (SeatState)seatStatus.State,
+            PriceOptions = seatStatus.PriceOptions.Select(o => new PriceOption
             {
                 Id = o.Id,
                 Name = o.Name,

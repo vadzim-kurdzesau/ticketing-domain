@@ -8,7 +8,8 @@ internal class SeatEntityConfiguration : IEntityTypeConfiguration<Seat>
 {
     public void Configure(EntityTypeBuilder<Seat> builder)
     {
-        builder.HasMany(s => s.PriceOptions)
-            .WithMany(p => p.Seats);
+        builder.HasMany(s => s.EventSeats)
+            .WithOne(s => s.Seat)
+            .HasForeignKey(s => s.SeatId);
     }
 }

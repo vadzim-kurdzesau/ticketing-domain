@@ -25,6 +25,8 @@ public class EventContext : DbContext
 
     public DbSet<Payment> Payments { get; set; }
 
+    public DbSet<EventSeat> EventSeats { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
@@ -34,6 +36,7 @@ public class EventContext : DbContext
             .ApplyConfiguration(new RowEntityConfiguration())
             .ApplyConfiguration(new SeatEntityConfiguration())
             .ApplyConfiguration(new PriceEntityConfiguration())
-            .ApplyConfiguration(new OrderItemEntityConfiguration());
+            .ApplyConfiguration(new OrderItemEntityConfiguration())
+            .ApplyConfiguration(new EventSeatEntityConfiguration());
     }
 }

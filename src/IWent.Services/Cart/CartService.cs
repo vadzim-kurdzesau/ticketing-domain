@@ -67,8 +67,8 @@ public class CartService : ICartService
         Payment order;
         using (var transaction = _eventContext.Database.BeginTransaction())
         {
-            var seats = _eventContext.Seats
-                .Where(s => seatIds.Keys.Contains(s.Id));
+            var seats = _eventContext.EventSeats
+                .Where(s => seatIds.Keys.Contains(s.SeatId));
 
             foreach (var seat in seats)
             {
@@ -81,8 +81,9 @@ public class CartService : ICartService
                 Status = Persistence.Entities.PaymentStatus.Pending,
                 OrderItems = seats.Select(s => new Persistence.Entities.OrderItem
                 {
-                    SeatId = s.Id,
-                    PriceId = seatIds[s.Id].PriceId,
+                    SeatId = s.SeatId,
+                    EventId = s.EventId,
+                    PriceId = seatIds[s.SeatId].PriceId,
                 }).ToList(),
             };
 

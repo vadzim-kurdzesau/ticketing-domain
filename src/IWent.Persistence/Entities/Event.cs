@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace IWent.Persistence.Entities;
 
@@ -31,4 +32,9 @@ public class Event
     /// The venue where this event is happening.
     /// </summary>
     public Venue Venue { get; set; } = null!;
+
+    /// <summary>
+    /// The seats of this particullar event with their states.
+    /// </summary>
+    public IEnumerable<EventSeat> EventManifest { get; set; } = null!;
 }

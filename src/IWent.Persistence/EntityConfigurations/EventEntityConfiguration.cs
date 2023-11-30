@@ -13,5 +13,9 @@ internal class EventEntityConfiguration : IEntityTypeConfiguration<Event>
 
         builder.HasOne(e => e.Venue)
             .WithMany(v => v.Events);
+
+        builder.HasMany(e => e.EventManifest)
+            .WithOne(s => s.Event)
+            .HasForeignKey(s => s.EventId);
     }
 }

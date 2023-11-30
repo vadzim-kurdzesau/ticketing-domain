@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace IWent.Persistence.Entities;
 
@@ -26,5 +25,5 @@ public class Price
     /// <summary>
     /// The list of seats with this price offer.
     /// </summary>
-    public IEnumerable<Seat> Seats { get; set; } = null!;
+    public IEnumerable<EventSeat> Seats { get; set; } = null!;
 }

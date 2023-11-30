@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace IWent.Persistence.Entities;
 
@@ -29,12 +28,7 @@ public class Seat
     public Row Row { get; set; } = null!;
 
     /// <summary>
-    /// The state of the seat.
+    /// The events where this seats is used.
     /// </summary>
-    public SeatState State { get; set; }
-
-    /// <summary>
-    /// The price offers for which this seat is being sold.
-    /// </summary>
-    public IEnumerable<Price> PriceOptions { get; set; } = null!;
+    public IEnumerable<EventSeat> EventSeats { get; set; } = null!;
 }

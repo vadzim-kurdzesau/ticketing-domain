@@ -12,7 +12,8 @@ internal class OrderItemEntityConfiguration : IEntityTypeConfiguration<OrderItem
             .WithMany(p => p.OrderItems);
 
         builder.HasOne(i => i.Seat)
-            .WithOne();
+            .WithOne()
+            .HasForeignKey<OrderItem>(i => new { i.SeatId, i.EventId });
 
         builder.HasOne(i => i.Price)
             .WithMany();

@@ -16,6 +16,11 @@ public class OrderItem
     public int SeatId { get; set; }
 
     /// <summary>
+    /// The unique identifier of the seat added to this order.
+    /// </summary>
+    public int EventId { get; set; }
+
+    /// <summary>
     /// The unique identifier of the chosen for this seat price option.
     /// </summary>
     public int PriceId { get; set; }
@@ -28,7 +33,7 @@ public class OrderItem
     /// <summary>
     /// The seat added to this order.
     /// </summary>
-    public Seat Seat { get; set; } = null!;
+    public EventSeat Seat { get; set; } = null!;
 
     /// <summary>
     /// The chosen for this seat price option.
