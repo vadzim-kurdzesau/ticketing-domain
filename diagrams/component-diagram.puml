@@ -1,0 +1,69 @@
+@startuml "component-diagram"
+
+!define webPage rectangle #SkyBlue
+!define externalSystem cloud
+
+webPage "Customers' Interface" <<UI>> as Customer_UI
+interface "Request Entry Point" as I_EntryPoint
+
+Customer_UI --( I_EntryPoint
+[API Gateway] as Gateway
+Gateway -up- I_EntryPoint
+
+interface "Authentication\n        and \nAuthorization" as I_Identity
+interface "Customer Notification" as I_Notifications
+interface "Booking Management" as I_Booking_Management
+interface "    Event\nManagement" as I_Event_Management
+interface "Shopping Cart" as I_Shopping_Cart
+interface "Payment Proccessing" as I_Payment_Proccessing
+
+Gateway -right-( I_Identity
+Gateway -down-( I_Notifications
+Gateway -down-( I_Booking_Management
+Gateway -down-( I_Event_Management
+Gateway -down-( I_Shopping_Cart
+Gateway -down-( I_Payment_Proccessing
+
+[Identity Service] -- I_Identity
+interface "Identity Storage" as I_Identity_Storage
+database "Identity Database" as IdentityDb
+IdentityDb -- I_Identity_Storage
+[Identity Service] --( I_Identity_Storage
+
+[Event Service] -up- I_Event_Management
+interface "Events Storage" as I_Events_Storage
+[Event Service] --( I_Events_Storage
+database "Events Database" as eventsDb
+eventsDb -up- I_Events_Storage
+
+[Booking Service] -up- I_Booking_Management
+
+[Notification Service] -up- I_Notifications
+interface "Email Notification" as I_Email_Service
+[Notification Service] --( I_Email_Service
+externalSystem "Email Service" as email
+email -up- I_Email_Service
+
+[Cart Service] -up- I_Shopping_Cart
+interface "Cart Storage" as I_Cart_Storage
+[Cart Service] -down-( I_Cart_Storage
+database "Cart Cache" as CartDb
+CartDb -up- I_Cart_Storage
+
+[Transaction Service] -up- I_Payment_Proccessing
+interface "Transactions History" as I_Transactions_Storage
+[Transaction Service] -down- I_Transactions_Storage
+database "Transactions Database" as TransactionDb
+TransactionDb -up- I_Transactions_Storage
+
+interface "Services Communication" as I_Bus_Service
+queue "Message Broker" as messageBroker
+messageBroker -up- I_Bus_Service
+
+[Transaction Service] -down-( I_Bus_Service
+[Notification Service] -down-( I_Bus_Service
+[Booking Service] -down-( I_Bus_Service
+[Event Service] -down-( I_Bus_Service
+[Cart Service] -down-( I_Bus_Service
+
+@enduml

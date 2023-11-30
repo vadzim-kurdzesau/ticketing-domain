@@ -1,0 +1,114 @@
+@startuml lowest-price-seat-booking-sequence-diagram
+
+actor Customer as user
+boundary "Events Page" as eventsPage
+boundary "Booking Page" as bookingPage
+boundary "Checkout Page" as checkoutPage
+participant "Events Service" as eventService
+database "Events Database" as eventsDb
+
+participant "Cart Service" as cartService
+database "Cart Cache" as cartCache
+participant "Transaction Service" as transactionService
+entity "Payment Status Tracker" as paymentTracking
+participant "Notification Service" as notifications
+queue "Message Queue" as queueService
+boundary "Payment API" as paymentApi
+
+activate eventsDb
+activate eventService
+activate cartService
+activate transactionService
+activate notifications
+
+user -> eventsPage ++ : Check Available Events
+eventsPage -> eventService : Get Available Events
+eventService -> eventsDb : Get Available Events
+eventsDb --> eventService : Return Available Events
+eventService --> eventsPage : Return Available Events
+eventsPage -> user : Display Available Events
+
+
+user -> eventsPage : Select Event
+eventsPage -> bookingPage ++ : Redirect to
+deactivate eventsPage
+bookingPage -> eventService : Request Venue Manifest
+eventService -> eventsDb : Get Venue Seats
+eventsDb --> eventService : Return Venue Seats
+eventService --> bookingPage : Return Venue Manifest
+bookingPage --> user: Display Event Manifest
+
+user -> bookingPage : Press 'Sort by Price' Button
+bookingPage -> eventService : Request Sorted Venue Manifest by Price
+eventService -> eventsDb : Get Sorted Venue Seats by Price
+eventsDb --> eventService : Return Sorted Venue Seats
+eventService --> bookingPage : Return Sorted Venue Manifest
+bookingPage --> user: Display Event Seats \nStarting from the Cheapest
+
+user -> bookingPage : Book Cheapest Seat
+bookingPage -> cartService : Add Seat to Cart
+cartService -> queueService ++ : Notify Seat Has Been Booked
+queueService -> eventService : Notify Seat Has Been Booked
+eventService -> eventsDb : Change Seat State to 'Booked'
+eventsDb --> eventService : Operation was Successful
+eventService --> queueService : Acknowledge
+queueService --> cartService : Acknowledge Seat Has Been Booked
+cartService -> cartCache ++: Add Booking to Cache
+cartCache --> cartService : Operation was Successful
+cartService --> bookingPage : Acknowledge Booking
+bookingPage --> user -- : Display that Booking was Successful
+
+
+user -> checkoutPage ++: Open Cart
+checkoutPage -> cartService : Get User's Cart
+cartService -> cartCache : Get User's Bookings
+cartCache --> cartService : Return User's Bookings
+cartService --> checkoutPage : Return User's Cart
+checkoutPage --> user : Display User's Cart
+
+user -> checkoutPage: Pay for Seats
+checkoutPage -> transactionService : Buy Seats
+transactionService -> paymentApi ++ : Process Payment
+paymentApi --> transactionService -- : Payment was Successful
+transactionService -> paymentTracking ++ : Create Status Tracker
+paymentTracking -> transactionService : Return Success
+transactionService --> checkoutPage : Return Payment Tracker
+paymentTracking -> checkoutPage : Notify Payment is in Progress
+checkoutPage -> checkoutPage : Display Payment Status
+transactionService -> queueService : Notify Seat Has Been Purchased
+
+queueService -> eventService : Notify Seat Has Been Purchased
+eventService --> queueService : Acknowledge
+eventService -> eventsDb : Change Seat State to 'Sold'
+eventsDb --> eventService : Operation was Successful
+eventService -> queueService : Notify Seat Status Has Changed
+
+queueService -> notifications : Notify Seat Status Has Changed
+notifications --> queueService : Acknowledge
+notifications -> : Send Tickets to User's Email
+notifications <-- : Receive Acknowledgement
+notifications -> queueService : Notify Tickets were Sent
+
+queueService -> transactionService : Notify Tickets were Sent
+transactionService --> queueService : Acknowledge
+transactionService -> paymentTracking : Change Payment Status to Completed
+paymentTracking --> transactionService : Return Success
+paymentTracking -> checkoutPage -- : Notify Payment was Successful
+checkoutPage -> checkoutPage : Display Payment Success
+
+queueService -> cartService : Notify Tickets were Sent
+cartService --> queueService : Acknowledge
+cartService -> cartCache : Remove Booking from Cache
+cartCache --> cartService : Operation was Successful
+
+checkoutPage --> user --: Display that Payment was Successful
+
+deactivate eventsDb
+deactivate eventService
+deactivate cartService
+deactivate transactionService
+deactivate notifications
+deactivate queueService
+deactivate cartCache
+
+@enduml

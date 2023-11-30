@@ -1,0 +1,23 @@
+@startuml seat-state-machine
+
+[*] --> Available
+Available --> Booked : User Books\nthis Seat
+Booked --> Available : Timer Ran Out
+Booked --> Available : User Removes\nthe Ticket from Cart
+
+state Booked {
+    state "Booking Timer Running" as timer {
+        [*] --> Running
+        Running --> Finished: Timer\nRan Out
+        Finished --> [*]
+        Running --> Stopped : User Pays\nfor the Ticket
+        Running --> Stopped : User Removes\nthe Ticket from Cart
+        Stopped -> [*]
+    }
+}
+
+Booked -down-> Sold : User Pays for the Ticket
+Sold -down-> [*]
+
+
+@enduml
