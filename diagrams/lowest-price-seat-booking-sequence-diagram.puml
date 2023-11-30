@@ -38,20 +38,14 @@ eventsDb --> eventService : Return Venue Seats
 eventService --> bookingPage : Return Venue Manifest
 bookingPage --> user: Display Event Manifest
 
-loop until all seats are checked
-    alt is seat available
-        user -> bookingPage : Check Seat's Price
+user -> bookingPage : Press 'Sort by Price' Button
+bookingPage -> eventService : Request Sorted Venue Manifest by Price
+eventService -> eventsDb : Get Sorted Venue Seats by Price
+eventsDb --> eventService : Return Sorted Venue Seats
+eventService --> bookingPage : Return Sorted Venue Manifest
+bookingPage --> user: Display Event Seats \nStarting from the Cheapest
 
-        alt cheaper than previously chosen
-            bookingPage --> user : Select this Seat
-        else not cheaper
-            bookingPage --> user: Do Nothing
-        end 
-    end
-end
-
-
-user -> bookingPage : Book Selected Seat
+user -> bookingPage : Book Cheapest Seat
 bookingPage -> cartService : Add Seat to Cart
 cartService -> queueService ++ : Notify Seat Has Been Booked
 queueService -> eventService : Notify Seat Has Been Booked
