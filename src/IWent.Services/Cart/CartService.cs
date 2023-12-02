@@ -72,7 +72,7 @@ public class CartService : ICartService
 
             foreach (var seat in seats)
             {
-                seat.State = SeatState.Booked;
+                seat.StateId = SeatStatus.Booked;
             }
 
             order = new Payment

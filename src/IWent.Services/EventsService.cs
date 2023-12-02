@@ -33,6 +33,7 @@ public class EventsService : IEventsService
     public async Task<IEnumerable<SectionSeat>> GetSectionSeats(int eventId, int sectionId, CancellationToken cancellationToken)
     {
         var seats = await _eventContext.EventSeats
+            .Include(s => s.State)
             .Include(s => s.PriceOptions)
             .Include(s => s.Seat)
             .ThenInclude(s => s.Row)
@@ -59,15 +60,15 @@ public class EventsService : IEventsService
             }
         };
 
-    private static SectionSeat ToDTO(Persistence.Entities.EventSeat seatStatus)
+    private static SectionSeat ToDTO(Persistence.Entities.EventSeat eventSeat)
         => new SectionSeat
         {
-            SectionId = seatStatus.Seat.Row.SectionId,
-            RowId = seatStatus.Seat.RowId,
-            SeatId = seatStatus.SeatId,
-            Number = seatStatus.Seat.Number,
-            State = (SeatState)seatStatus.State,
-            PriceOptions = seatStatus.PriceOptions.Select(o => new PriceOption
+            SectionId = eventSeat.Seat.Row.SectionId,
+            RowId = eventSeat.Seat.RowId,
+            SeatId = eventSeat.SeatId,
+            StateId = (SeatState)eventSeat.StateId,
+            StateName = eventSeat.State.Name,
+            PriceOptions = eventSeat.PriceOptions.Select(o => new PriceOption
             {
                 Id = o.Id,
                 Name = o.Name,

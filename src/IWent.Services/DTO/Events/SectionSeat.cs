@@ -23,14 +23,14 @@ public class SectionSeat
     public int SeatId { get; set; }
 
     /// <summary>
-    /// The unique number of this seat in this section.
+    /// The id of a state of the seat.
     /// </summary>
-    public int Number { get; set; }
+    public SeatState StateId { get; set; }
 
     /// <summary>
-    /// The state of the seat.
+    /// The name of the seat state.
     /// </summary>
-    public SeatState State { get; set; }
+    public string StateName { get; set; }
 
     /// <summary>
     /// The available price options for this seat.

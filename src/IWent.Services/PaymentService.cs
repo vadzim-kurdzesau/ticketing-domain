@@ -37,20 +37,20 @@ public class PaymentService : IPaymentService
         => ChangePaymentStatusAsync(
             paymentId,
             newPaymentStatus: Persistence.Entities.PaymentStatus.Completed,
-            newSeatState: Persistence.Entities.SeatState.Sold,
+            newSeatStatus: Persistence.Entities.SeatStatus.Sold,
             cancellationToken);
 
     public Task FailOrderPaymentAsync(string paymentId, CancellationToken cancellationToken)
         => ChangePaymentStatusAsync(
             paymentId,
             newPaymentStatus: Persistence.Entities.PaymentStatus.Failed,
-            newSeatState: Persistence.Entities.SeatState.Available,
+            newSeatStatus: Persistence.Entities.SeatStatus.Available,
             cancellationToken);
 
     private async Task ChangePaymentStatusAsync(
         string paymentId,
         Persistence.Entities.PaymentStatus newPaymentStatus,
-        Persistence.Entities.SeatState newSeatState,
+        Persistence.Entities.SeatStatus newSeatStatus,
         CancellationToken cancellationToken)
     {
         using (var transaction = _eventContext.Database.BeginTransaction())
@@ -73,7 +73,7 @@ public class PaymentService : IPaymentService
             payment.Status = newPaymentStatus;
             foreach (var orderItem in payment.OrderItems)
             {
-                orderItem.Seat.State = newSeatState;
+                orderItem.Seat.StateId = newSeatStatus;
             }
 
             await _eventContext.SaveChangesAsync(cancellationToken);

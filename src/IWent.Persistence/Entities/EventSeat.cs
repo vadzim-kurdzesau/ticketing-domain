@@ -18,9 +18,14 @@ public class EventSeat
     public int EventId { get; set; }
 
     /// <summary>
+    /// The unique identifier of the state of the seat.
+    /// </summary>
+    public SeatStatus StateId { get; set; }
+
+    /// <summary>
     /// The state of the seat.
     /// </summary>
-    public SeatState State { get; set; }
+    public SeatState State { get; set; } = null!;
 
     /// <summary>
     /// The seat.

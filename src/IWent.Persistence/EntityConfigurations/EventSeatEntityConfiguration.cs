@@ -19,6 +19,10 @@ internal class EventSeatEntityConfiguration : IEntityTypeConfiguration<EventSeat
             .HasForeignKey(s => s.SeatId)
             .OnDelete(DeleteBehavior.NoAction);
 
+        builder.HasOne(s => s.State)
+            .WithMany()
+            .HasForeignKey(s => s.StateId);
+
         builder.HasMany(s => s.PriceOptions)
             .WithMany(p => p.Seats);
 
