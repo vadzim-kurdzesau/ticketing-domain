@@ -65,6 +65,12 @@ internal sealed class IntegrationTestsClient : IDisposable
         await _httpClient.PostAsync(url, content: null);
     }
 
+    public async Task FailOrderPaymentAsync(string paymentId)
+    {
+        var url = $"api/payments/{paymentId}/failed";
+        await _httpClient.PostAsync(url, content: null);
+    }
+
     public void Dispose()
     {
         _httpClient.Dispose();
