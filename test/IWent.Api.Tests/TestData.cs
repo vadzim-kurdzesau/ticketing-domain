@@ -89,4 +89,118 @@ internal class TestData
             },
         }
     };
+
+    public static IEnumerable<EventSeat> EventSeats => new EventSeat[]
+    {
+        new EventSeat
+        {
+            EventId = 1,
+            SeatId = 1,
+            Seat = new Seat
+            {
+                Id = 1,
+                Number = 1,
+                RowId = 1,
+                Row = new Row
+                {
+                    Id = 1,
+                    Number = 1,
+                    SectionId = 1,
+                }
+            },
+            StateId = SeatStatus.Available,
+            PriceOptions = new Price[]
+            {
+                new Price { Id = 1, Name = "Adult" }
+            },
+            State = new SeatState
+            {
+                Id = SeatStatus.Available,
+                Name = "Available"
+            },
+        },
+        new EventSeat
+        {
+            EventId = 1,
+            SeatId = 2,
+            Seat = new Seat
+            {
+                Id = 2,
+                Number = 2,
+                RowId = 1,
+                Row = new Row
+                {
+                    Id = 1,
+                    Number = 1,
+                    SectionId = 1,
+                }
+            },
+            StateId = SeatStatus.Available,
+            PriceOptions = new Price[]
+            {
+                new Price { Id = 1, Name = "Adult" }
+            },
+            State = new SeatState
+            {
+                Id = SeatStatus.Available,
+                Name = "Available"
+            },
+        },
+        
+        new EventSeat
+        {
+            EventId = 2,
+            SeatId = 1,
+            Seat = new Seat
+            {
+                Id = 1,
+                Number = 1,
+                RowId = 1,
+                Row = new Row
+                {
+                    Id = 1,
+                    Number = 1,
+                    SectionId = 1,
+                }
+            },
+            StateId = SeatStatus.Available,
+            PriceOptions = new Price[]
+            {
+                new Price { Id = 1, Name = "Adult" }
+            },
+            State = new SeatState
+            {
+                Id = SeatStatus.Available,
+                Name = "Available"
+            },
+        },
+
+        new EventSeat
+        {
+            EventId = 2,
+            SeatId = 2,
+            Seat = new Seat
+            {
+                Id = 2,
+                Number = 2,
+                RowId = 2,
+                Row = new Row
+                {
+                    Id = 2,
+                    Number = 2,
+                    SectionId = 1,
+                }
+            },
+            StateId = SeatStatus.Available,
+            PriceOptions = new Price[]
+            {
+                new Price { Id = 1, Name = "Adult" }
+            },
+            State = new SeatState
+            {
+                Id = SeatStatus.Available,
+                Name = "Available"
+            },
+        },
+    };
 }

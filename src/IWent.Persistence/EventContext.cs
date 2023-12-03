@@ -13,21 +13,21 @@ public class EventContext : DbContext
 
     public virtual DbSet<Event> Events { get; set; }
 
-    public DbSet<Venue> Venues { get; set; }
+    public virtual DbSet<Venue> Venues { get; set; }
 
-    public DbSet<Section> Sections { get; set; }
+    public virtual DbSet<Section> Sections { get; set; }
 
-    public DbSet<Row> Rows { get; set; }
+    public virtual DbSet<Row> Rows { get; set; }
 
-    public DbSet<Seat> Seats { get; set; }
+    public virtual DbSet<Seat> Seats { get; set; }
 
-    public DbSet<Price> Prices { get; set; }
+    public virtual DbSet<Price> Prices { get; set; }
 
-    public DbSet<Payment> Payments { get; set; }
+    public virtual DbSet<Payment> Payments { get; set; }
 
-    public DbSet<EventSeat> EventSeats { get; set; }
+    public virtual DbSet<EventSeat> EventSeats { get; set; }
 
-    public DbSet<SeatState> SeatStates { get; set; }
+    public virtual DbSet<SeatState> SeatStates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
