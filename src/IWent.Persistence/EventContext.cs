@@ -11,7 +11,7 @@ public class EventContext : DbContext
     {
     }
 
-    public DbSet<Event> Events { get; set; }
+    public virtual DbSet<Event> Events { get; set; }
 
     public DbSet<Venue> Venues { get; set; }
 

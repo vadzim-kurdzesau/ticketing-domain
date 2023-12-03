@@ -20,7 +20,7 @@ public class EventsService : IEventsService
 
     public async Task<IEnumerable<Event>> GetEventsAsync(int page, int amount, CancellationToken cancellationToken)
     {
-        var events = await _eventContext.Events.OrderByDescending(e => e.Date)
+        var events = await _eventContext.Events.OrderBy(e => e.Date)
             .Skip((page - 1) * amount)
             .Take(amount)
             .Include(e => e.Venue)
