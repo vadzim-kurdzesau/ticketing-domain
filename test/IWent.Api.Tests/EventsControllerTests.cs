@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using FluentAssertions;
 using IWent.Api.Tests.Client;
 using IWent.Services.DTO.Common;
 using IWent.Services.DTO.Events;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
 using Moq.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Xunit;
@@ -26,13 +21,19 @@ public class EventsControllerTests : IClassFixture<EventsWebApplicationFactory>
     }
 
     [Theory]
-    [InlineData(1, 10, 5)]
-    public async Task GetEvents_ReturnsPaginatedAvailableEvents(int page, int size, int eventsExpected)
+    [InlineData(1, 10)]
+    [InlineData(2, 2)]
+    [InlineData(4, 1)]
+    [InlineData(4, 3)]
+    [InlineData(1, 3)]
+    public async Task GetEvents_ReturnsPaginatedAvailableEvents(int page, int size)
     {
         // Arrange
         var url = $"api/events?page={page}&size={size}";
 
         var existingEvents = TestData.Events.OrderBy(e => e.Date);
+        var expectedEvents = existingEvents.Skip((page - 1) * size)
+            .Take(size);
         _webApplicationFactory.ContextMock.Setup(c => c.Events)
             .ReturnsDbSet(existingEvents);
 
@@ -46,7 +47,7 @@ public class EventsControllerTests : IClassFixture<EventsWebApplicationFactory>
         // Assert
         Assert.NotNull(events);
 
-        events.Should().BeEquivalentTo(existingEvents, options => options
+        events.Should().BeEquivalentTo(expectedEvents, options => options
                 .Using<Address>(ctx =>
                 {
                     ctx.Subject.Country.Should().Be(ctx.Expectation.Country);
@@ -57,6 +58,6 @@ public class EventsControllerTests : IClassFixture<EventsWebApplicationFactory>
                 .WhenTypeIs<Address>()
                 .ExcludingMissingMembers());
 
-        Assert.Equal(eventsExpected, events.Count);
+        Assert.Equal(expectedEvents.Count(), events.Count);
     }
 }
