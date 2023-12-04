@@ -56,6 +56,8 @@ public partial class Program
             options.TableName = "EventsCache";
         });
 
+        builder.Services.AddResponseCaching();
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -66,6 +68,8 @@ public partial class Program
         }
 
         app.UseHttpsRedirection();
+
+        app.UseResponseCaching();
 
         app.UseAuthorization();
 
