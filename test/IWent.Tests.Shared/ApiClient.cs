@@ -3,19 +3,42 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using IWent.Services.DTO.Events;
 using IWent.Services.DTO.Orders;
 using IWent.Services.DTO.Payments;
+using IWent.Services.DTO.Venues;
 using Newtonsoft.Json;
 
-namespace IWent.IntegrationTests.Setup;
+namespace IWent.Tests.Shared;
 
-internal sealed class IntegrationTestsClient : IDisposable
+public sealed class ApiClient : IDisposable
 {
     private readonly HttpClient _httpClient;
 
-    public IntegrationTestsClient(HttpClient httpClient)
+    public ApiClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
+    }
+
+    public async Task<IEnumerable<Event>> GetEventsAsync()
+    {
+        var url = "api/events";
+        var response = await MakeRequestAsync(client => client.GetAsync(url));
+        return await DeserializeResponseAsync<IEnumerable<Event>>(response);
+    }
+
+    public async Task<IEnumerable<SectionSeat>> GetSectionSeatsAsync(int eventId, int sectionId)
+    {
+        var url = $"api/events/{eventId}/sections/{sectionId}/seats";
+        var response = await MakeRequestAsync(client => client.GetAsync(url));
+        return await DeserializeResponseAsync<IEnumerable<SectionSeat>>(response);
+    }
+
+    public async Task<IEnumerable<VenueSection>> GetSectionsAsync(int venueId)
+    {
+        var url = $"api/venues/{venueId}/sections";
+        var response = await MakeRequestAsync(client => client.GetAsync(url));
+        return await DeserializeResponseAsync<IEnumerable<VenueSection>>(response);
     }
 
     public Task AddItemToCartAsync(string cartId, OrderItem item)

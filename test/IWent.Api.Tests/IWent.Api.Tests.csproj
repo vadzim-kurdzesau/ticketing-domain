@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\IWent.Api\IWent.Api.csproj" />
+    <ProjectReference Include="..\IWent.Tests.Shared\IWent.Tests.Shared.csproj" />
   </ItemGroup>
 
 </Project>

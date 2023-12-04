@@ -51,6 +51,7 @@ public class EventsService : IEventsService
             Id = @event.Id,
             Name = @event.Name,
             Date = @event.Date,
+            VenueId = @event.VenueId,
             Address = new Address
             {
                 Country = @event.Venue.Country,

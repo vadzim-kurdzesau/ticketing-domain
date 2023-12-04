@@ -24,6 +24,11 @@ public class Event
     public DateTime Date { get; set; }
 
     /// <summary>
+    /// The unique identifier of the venue this event is happening.
+    /// </summary>
+    public int VenueId { get; set; }
+
+    /// <summary>
     /// The location where this event is happening.
     /// </summary>
     public Address Address { get; set; } = null!;
