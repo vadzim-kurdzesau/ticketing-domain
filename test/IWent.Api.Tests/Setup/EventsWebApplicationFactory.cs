@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
-namespace IWent.Api.Tests.Client;
+namespace IWent.Api.Tests.Setup;
 
 public class EventsWebApplicationFactory : WebApplicationFactory<Program>
 {
@@ -21,15 +21,19 @@ public class EventsWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureServices(services =>
         {
-            // Remove the existing DbContext configuration
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<EventContext>));
-            if (descriptor != null)
-            {
-                services.Remove(descriptor);
-            }
-
-            // Add the mocked DbContext
-            services.AddScoped(provider => ContextMock.Object);
+            services.ReplaceService(ContextMock.Object);
         });
+    }
+}
+
+internal static class ServiceCollectionExtensions
+{
+    public static IServiceCollection ReplaceService<TService>(this IServiceCollection services, TService newImplementation) where TService : class
+    {
+        var existingDescriptor = services.Single(d => d.ServiceType == typeof(TService));
+        services.Remove(existingDescriptor);
+
+        services.Add(new ServiceDescriptor(typeof(TService), (services) => newImplementation, existingDescriptor.Lifetime));
+        return services;
     }
 }

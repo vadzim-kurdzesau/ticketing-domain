@@ -13,25 +13,25 @@ namespace IWent.IntegrationTests;
 public class TicketOrderingTests : IClassFixture<IntegrationTestsApplicationFactory>
 {
     private readonly IntegrationTestsApplicationFactory _applicationFactory;
+    private readonly ApiClient _client;
 
     public TicketOrderingTests(IntegrationTestsApplicationFactory applicationFactory)
     {
         _applicationFactory = applicationFactory;
+        _client = new ApiClient(_applicationFactory.CreateClient());
     }
 
     [Fact]
     public async Task PlaceOrder_SuccessfulPayment_BookedSeatsAreSold()
     {
-        var client = new ApiClient(_applicationFactory.CreateClient());
-
         // Get seats to book
-        var eventToAttend = (await client.GetEventsAsync()).First();
+        var eventToAttend = (await _client.GetEventsAsync()).First();
         var eventId = eventToAttend.Id;
 
-        var availableSections = await client.GetSectionsAsync(eventToAttend.VenueId);
+        var availableSections = await _client.GetSectionsAsync(eventToAttend.VenueId);
         var sectionId = availableSections.First().Id;
 
-        var seatsToBook = (await client.GetSectionSeatsAsync(eventId, sectionId))
+        var seatsToBook = (await _client.GetSectionSeatsAsync(eventId, sectionId))
             .Take(2).ToArray();
 
         // Book the seats
@@ -52,19 +52,19 @@ public class TicketOrderingTests : IClassFixture<IntegrationTestsApplicationFact
             },
         };
 
-        await client.AddItemToCartAsync(cartId, itemsToOrder[0]);
+        await _client.AddItemToCartAsync(cartId, itemsToOrder[0]);
 
-        await client.AddItemToCartAsync(cartId, itemsToOrder[1]);
+        await _client.AddItemToCartAsync(cartId, itemsToOrder[1]);
 
-        var paymentInfo = await client.BookItemsInCartAsync(cartId);
+        var paymentInfo = await _client.BookItemsInCartAsync(cartId);
 
-        await client.CompleteOrderPaymentAsync(paymentInfo.PaymentId);
+        await _client.CompleteOrderPaymentAsync(paymentInfo.PaymentId);
 
         // Assert
-        var resultPaymentInfo = await client.GetPaymentInfoAsync(paymentInfo.PaymentId);
+        var resultPaymentInfo = await _client.GetPaymentInfoAsync(paymentInfo.PaymentId);
         Assert.Equal(PaymentStatus.Completed, resultPaymentInfo.Status);
 
-        var bookedSeats = (await client.GetSectionSeatsAsync(eventId, sectionId))
+        var bookedSeats = (await _client.GetSectionSeatsAsync(eventId, sectionId))
             .Where(s => seatsToBook.Select(s => s.SeatId).Contains(s.SeatId))
             .ToArray();
 
@@ -74,16 +74,14 @@ public class TicketOrderingTests : IClassFixture<IntegrationTestsApplicationFact
     [Fact]
     public async Task PlaceOrder_FailedPayment_BookedSeatsReturnToAvailable()
     {
-        var client = new ApiClient(_applicationFactory.CreateClient());
-
         // Get seats to book
-        var eventToAttend = (await client.GetEventsAsync()).First();
+        var eventToAttend = (await _client.GetEventsAsync()).First();
         var eventId = eventToAttend.Id;
 
-        var availableSections = await client.GetSectionsAsync(eventToAttend.VenueId);
+        var availableSections = await _client.GetSectionsAsync(eventToAttend.VenueId);
         var sectionId = availableSections.First().Id;
 
-        var seatsToBook = (await client.GetSectionSeatsAsync(eventId, sectionId))
+        var seatsToBook = (await _client.GetSectionSeatsAsync(eventId, sectionId))
             .Skip(2).Take(2).ToArray();
 
         // Book the seats
@@ -104,19 +102,19 @@ public class TicketOrderingTests : IClassFixture<IntegrationTestsApplicationFact
             },
         };
 
-        await client.AddItemToCartAsync(cartId, itemsToOrder[0]);
+        await _client.AddItemToCartAsync(cartId, itemsToOrder[0]);
 
-        await client.AddItemToCartAsync(cartId, itemsToOrder[1]);
+        await _client.AddItemToCartAsync(cartId, itemsToOrder[1]);
 
-        var paymentInfo = await client.BookItemsInCartAsync(cartId);
+        var paymentInfo = await _client.BookItemsInCartAsync(cartId);
 
-        await client.FailOrderPaymentAsync(paymentInfo.PaymentId);
+        await _client.FailOrderPaymentAsync(paymentInfo.PaymentId);
 
         // Assert
-        var resultPaymentInfo = await client.GetPaymentInfoAsync(paymentInfo.PaymentId);
+        var resultPaymentInfo = await _client.GetPaymentInfoAsync(paymentInfo.PaymentId);
         Assert.Equal(PaymentStatus.Failed, resultPaymentInfo.Status);
 
-        var bookedSeats = (await client.GetSectionSeatsAsync(eventId, sectionId))
+        var bookedSeats = (await _client.GetSectionSeatsAsync(eventId, sectionId))
             .Where(s => seatsToBook.Select(s => s.SeatId).Contains(s.SeatId))
             .ToArray();
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using IWent.Api.Parameters;
 using IWent.Services.DTO.Events;
 using IWent.Services.DTO.Orders;
 using IWent.Services.DTO.Payments;
@@ -20,9 +21,12 @@ public sealed class ApiClient : IDisposable
         _httpClient = httpClient;
     }
 
-    public async Task<IEnumerable<Event>> GetEventsAsync()
+    public async Task<IEnumerable<Event>> GetEventsAsync(PaginationParameters? paginationParameters = null)
     {
-        var url = "api/events";
+        var url = paginationParameters == null
+            ? $"api/events"
+            : $"api/events?page={paginationParameters.Page}&size={paginationParameters.Size}";
+
         var response = await MakeRequestAsync(client => client.GetAsync(url));
         return await DeserializeResponseAsync<IEnumerable<Event>>(response);
     }
@@ -91,7 +95,7 @@ public sealed class ApiClient : IDisposable
         var response = await requestAction(_httpClient);
         if (!response.IsSuccessStatusCode)
         {
-            throw new ApiClientException($"The request was not successful: ({response.StatusCode}): {response.ReasonPhrase}.");
+            throw new ApiClientException($"The request was not successful: ({(int)response.StatusCode}): {response.ReasonPhrase}.");
         }
 
         return response;

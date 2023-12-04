@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using IWent.Persistence.Entities;
 
-namespace IWent.Api.Tests;
+namespace IWent.Api.Tests.Setup;
 
-internal class TestData
+internal static class TestData
 {
     public static IEnumerable<Event> Events => new Event[]
     {
@@ -146,7 +146,7 @@ internal class TestData
                 Name = "Available"
             },
         },
-        
+
         new EventSeat
         {
             EventId = 2,
