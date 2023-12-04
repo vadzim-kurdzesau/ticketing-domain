@@ -1,6 +1,8 @@
+using System;
 using IWent.Api.Filters;
 using IWent.Persistence;
 using IWent.Services;
+using IWent.Services.Caching;
 using IWent.Services.Cart;
 using IWent.Services.DTO;
 using Microsoft.AspNetCore.Builder;
@@ -16,8 +18,6 @@ public partial class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
-        // Add services to the container.
 
         builder.Services.AddControllers(options =>
         {
@@ -41,6 +41,20 @@ public partial class Program
         builder.Services.AddScoped<ICartService, CartService>();
         builder.Services.AddScoped<IPaymentService, PaymentService>();
         builder.Services.AddSingleton<ICartStorage, InMemoryCartStorage>();
+        builder.Services.AddSingleton(typeof(ICacheService<>), typeof(CacheService<>));
+        builder.Services.AddTransient<ICacheConfiguration, CacheConfiguration>(services =>
+        {
+            var configuration = services.GetRequiredService<IConfiguration>();
+            return configuration.GetRequiredSection("Caching").Get<CacheConfiguration>()
+                ?? throw new InvalidOperationException($"Unable to get the '{typeof(CacheConfiguration)}' from configuration.");
+        });
+
+        builder.Services.AddDistributedSqlServerCache(options =>
+        {
+            options.ConnectionString = builder.Configuration.GetConnectionString("Cache");
+            options.SchemaName = "dbo";
+            options.TableName = "EventsCache";
+        });
 
         var app = builder.Build();
 
@@ -54,7 +68,6 @@ public partial class Program
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
-
 
         app.MapControllers();
 
