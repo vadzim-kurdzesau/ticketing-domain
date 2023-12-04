@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using IWent.Persistence.Entities;
 
-namespace IWent.IntegrationTests;
+namespace IWent.IntegrationTests.Setup;
 
-internal class TestData
+internal static class TestData
 {
     public static Event Event =>
         new Event
         {
             Name = "Test Marafon",
-            Date = new DateTime(2024, 12, 12),
+            Date = new DateTime(2024, 12, 12, 0, 0, 0, DateTimeKind.Utc),
             Venue = new Venue
             {
                 Name = "Test Stadium",
