@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace IWent.Persistence.Entities;
 
@@ -36,6 +37,11 @@ public class EventSeat
     /// The event this seat is related to.
     /// </summary>
     public Event Event { get; set; } = null!;
+
+    /// <summary>
+    /// The concurrency token used to .
+    /// </summary>
+    public int Version { get; set; }
 
     /// <summary>
     /// The price offers for which this seat is being sold.

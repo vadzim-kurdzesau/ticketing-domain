@@ -27,5 +27,8 @@ internal class EventSeatEntityConfiguration : IEntityTypeConfiguration<EventSeat
             .WithMany(p => p.Seats);
 
         builder.ToTable("events_seats");
+
+        builder.Property(s => s.Version)
+            .IsConcurrencyToken();
     }
 }
