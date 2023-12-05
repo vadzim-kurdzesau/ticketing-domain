@@ -33,13 +33,21 @@ public class CartService : ICartService
         return cart.Select(i => ToDTO(in i));
     }
 
-    public CartState AddToCart(string cartId, DTO.Orders.OrderItem orderItem)
+    public async Task<CartState> AddToCartAsync(string cartId, DTO.Orders.OrderItem orderItem, CancellationToken cancellationToken)
     {
-        var cart = _cartStorage.GetOrCreate(cartId);
-        if (!cart.TryAddItem(new CartItem(orderItem.EventId, orderItem.SeatId, orderItem.PriceId, addedAt: DateTime.UtcNow)))
+        var seat = await _eventContext.EventSeats.FindAsync(new object[] { orderItem.SeatId, orderItem.EventId }, cancellationToken);
+        if (seat == null)
         {
-            throw new CartAlreadyExistsException($"Cart with the '{cartId}' id already exists.");
+            throw new ResourceDoesNotExistException($"Seat with the id '{orderItem.SeatId}' for the event with the id '{orderItem.EventId}' does not exist.");
         }
+
+        if (seat.StateId != SeatStatus.Available)
+        {
+            throw new ApiException($"Seat  with the id '{orderItem.SeatId}' for the event with the id '{orderItem.EventId}' already has been booked.");
+        }
+
+        var cart = _cartStorage.GetOrCreate(cartId);
+        cart.TryAddItem(new CartItem(orderItem.EventId, orderItem.SeatId, orderItem.PriceId, addedAt: DateTime.UtcNow));
 
         return new CartState
         {
@@ -75,6 +83,11 @@ public class CartService : ICartService
 
             foreach (var seat in seats)
             {
+                if (seat.StateId != SeatStatus.Available)
+                {
+                    throw new InvalidOperationException($"Cannot book a seat with the id '{seat.SeatId}' because it's has already been booked.");
+                }
+
                 seat.StateId = SeatStatus.Booked;
             }
 

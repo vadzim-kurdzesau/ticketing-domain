@@ -19,7 +19,7 @@ public interface ICartService
     /// <summary>
     /// Adds <paramref name="orderItem"/> to the cart with the specified <paramref name="cartId"/>.
     /// </summary>
-    CartState AddToCart(string cartId, OrderItem orderItem);
+    Task<CartState> AddToCartAsync(string cartId, OrderItem orderItem, CancellationToken cancellationToken);
 
     /// <summary>
     /// Removes seat with the specified <paramref name="seatId"/> from the cart with the <paramref name="cartId"/>.
