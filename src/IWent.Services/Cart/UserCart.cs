@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace IWent.Services.Cart;
@@ -8,7 +9,7 @@ namespace IWent.Services.Cart;
 /// </summary>
 public class UserCart : IEnumerable<CartItem>
 {
-    private readonly IDictionary<int, CartItem> _items = new Dictionary<int, CartItem>();
+    private readonly ConcurrentDictionary<int, CartItem> _items = new ConcurrentDictionary<int, CartItem>();
 
     /// <summary>
     /// The unique identifier of the cart.
@@ -32,7 +33,7 @@ public class UserCart : IEnumerable<CartItem>
     /// </summary>
     /// <returns>True, if item was successfully removed; false otherwise.</returns>
     public bool TryRemove(int seatId)
-        => _items.Remove(seatId);
+        => _items.TryRemove(seatId, out var _);
 
     public IEnumerator<CartItem> GetEnumerator()
         => _items.Values.GetEnumerator();

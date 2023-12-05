@@ -26,13 +26,13 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost("carts/{cartId}")]
-    public IActionResult AddToCart(string cartId, OrderItem item)
+    public async Task<IActionResult> AddToCart(string cartId, OrderItem item, CancellationToken cancellationToken)
     {
         try
         {
-            return Ok(_cartService.AddToCart(cartId, item));
+            return Ok(await _cartService.AddToCartAsync(cartId, item, cancellationToken));
         }
-        catch (CartAlreadyExistsException ex)
+        catch (ResourseAlreadyExistsException ex)
         {
             return Conflict(ex.Message);
         }
