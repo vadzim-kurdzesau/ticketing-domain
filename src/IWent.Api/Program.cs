@@ -1,12 +1,17 @@
 using System;
+using Azure.Identity;
+using Azure.Messaging.ServiceBus;
 using IWent.Api.Filters;
+using IWent.Notifications;
 using IWent.Persistence;
 using IWent.Services;
 using IWent.Services.Caching;
 using IWent.Services.Cart;
 using IWent.Services.DTO;
+using IWent.Services.Notifications;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -55,6 +60,16 @@ public partial class Program
             options.SchemaName = "dbo";
             options.TableName = "EventsCache";
         });
+
+        builder.Services.AddSingleton<ServiceBusClient>(provider =>
+        {
+            var serviceBusNamespace = "ticketing-system-bus.servicebus.windows.net";
+            var credential = new DefaultAzureCredential(includeInteractiveCredentials: true);
+            return new ServiceBusClient(serviceBusNamespace, credential);
+        });
+
+        builder.Services.AddSingleton<INotificationClient,  NotificationClient>();
+        builder.Services.AddHostedService<NotificationsListener>();
 
         builder.Services.AddResponseCaching();
 
