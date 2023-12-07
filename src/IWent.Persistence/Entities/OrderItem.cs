@@ -16,7 +16,7 @@ public class OrderItem
     public int SeatId { get; set; }
 
     /// <summary>
-    /// The unique identifier of the event.
+    /// The unique identifier of the event this item is related to.
     /// </summary>
     public int EventId { get; set; }
 
@@ -36,7 +36,7 @@ public class OrderItem
     public EventSeat Seat { get; set; } = null!;
 
     /// <summary>
-    /// 
+    /// The event this item is related to.
     /// </summary>
     public Event Event { get; set; }
 
