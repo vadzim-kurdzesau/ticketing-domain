@@ -2,8 +2,6 @@ using System;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using IWent.Api.Filters;
-using IWent.Notifications;
-using IWent.Notifications.Email;
 using IWent.Persistence;
 using IWent.Services;
 using IWent.Services.Caching;
@@ -12,7 +10,6 @@ using IWent.Services.DTO;
 using IWent.Services.Notifications;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -55,13 +52,6 @@ public partial class Program
                 ?? throw new InvalidOperationException($"Unable to get the '{typeof(CacheConfiguration)}' from configuration.");
         });
 
-        builder.Services.AddTransient<IEmailClientConfiguration, EmailClientConfiguration>(services =>
-        {
-            var configuration = services.GetRequiredService<IConfiguration>();
-            return configuration.GetRequiredSection("Email").Get<EmailClientConfiguration>()
-                ?? throw new InvalidOperationException($"Unable to get the '{typeof(EmailClientConfiguration)}' from configuration.");
-        });
-
         builder.Services.AddDistributedSqlServerCache(options =>
         {
             options.ConnectionString = builder.Configuration.GetConnectionString("Cache");
@@ -77,8 +67,6 @@ public partial class Program
         });
 
         builder.Services.AddSingleton<INotificationClient,  NotificationClient>();
-        builder.Services.AddHostedService<NotificationsListener>();
-        builder.Services.AddSingleton<IEmailClient, EmailClient>();
 
         builder.Services.AddResponseCaching();
 

@@ -1,28 +1,21 @@
-﻿using System.Net;
-using System.Net.Mail;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using MimeKit;
 
 namespace IWent.Notifications.Email;
 
-public sealed class EmailClient : IEmailClient, IDisposable
+internal sealed class EmailClient : IEmailClient
 {
-    private readonly SmtpClient _smtpClient;
+    private readonly IEmailClientFactory _emailClientFactory;
 
-    public EmailClient(IEmailClientConfiguration clientConfiguration)
+    public EmailClient(IEmailClientFactory emailClientFactory)
     {
-        _smtpClient = new SmtpClient(clientConfiguration.Host, clientConfiguration.Port)
-        {
-            Credentials = new NetworkCredential(clientConfiguration.Username, clientConfiguration.Password),
-            EnableSsl = true,
-        };
+        _emailClientFactory = emailClientFactory;
     }
 
-    public Task SendEmailAsync(MailMessage message, CancellationToken cancellationToken)
+    public async Task SendEmailAsync(MimeMessage message, CancellationToken cancellationToken)
     {
-        return _smtpClient.SendMailAsync(message, cancellationToken);
-    }
-
-    public void Dispose()
-    {
-        _smtpClient.Dispose();
+        var client = await _emailClientFactory.InitializeAsync(cancellationToken);
+        await client.SendAsync(message, cancellationToken);
     }
 }

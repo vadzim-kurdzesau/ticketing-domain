@@ -1,7 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using IWent.Messages;
+using IWent.Messages.Constants;
+using IWent.Messages.Contents;
 using IWent.Messages.Models;
 using IWent.Persistence;
 using IWent.Persistence.Entities;
@@ -78,13 +83,23 @@ public class PaymentService : IPaymentService
             transaction.Commit();
         }
 
-        var message = new TicketsBoughtMessage
+        var message = new Notification
         {
-            PaymentId = paymentId,
-            Tickets = payment.OrderItems.Select(ToTicket),
+            Id = Guid.NewGuid(),
+            Operation = Operation.Checkout,
+            Parameters = new Dictionary<string, string>()
+            {
+                { NotificationParameterKeys.ReceiverEmail, "ticketstestformeonly@mailinator.com" },
+                { NotificationParameterKeys.ReceiverName, "Nick" },
+            }.ToImmutableDictionary(),
+            Timestamp = DateTime.UtcNow,
+            Content = new TicketsCheckoutContent
+            {
+                Tickets = payment.OrderItems.Select(ToTicket),
+            },
         };
 
-        await _notificationClient.SendMessageAsync(message, "Email", cancellationToken);
+        await _notificationClient.SendMessageAsync(message, "Notifications", cancellationToken);
     }
 
     public async Task FailOrderPaymentAsync(string paymentId, CancellationToken cancellationToken)

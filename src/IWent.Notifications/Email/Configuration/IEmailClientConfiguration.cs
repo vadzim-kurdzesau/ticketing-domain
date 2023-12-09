@@ -1,4 +1,4 @@
-﻿namespace IWent.Notifications.Email;
+﻿namespace IWent.Notifications.Email.Configuration;
 
 public interface IEmailClientConfiguration
 {
@@ -9,4 +9,6 @@ public interface IEmailClientConfiguration
     string Username { get; init; }
 
     string Password { get; init; }
+
+    string SenderName { get; init; }
 }

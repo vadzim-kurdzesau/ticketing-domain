@@ -1,70 +1,71 @@
-﻿using System.Net.Mail;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
 using IWent.Messages;
-using IWent.Notifications.Email;
+using IWent.Notifications.Handling;
+using IWent.Notifications.Messaging;
+using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace IWent.Notifications;
 
-public class NotificationsListener : BackgroundService
+internal class NotificationsListener : BackgroundService
 {
-    private readonly ServiceBusClient _serviceBusClient;
-    private readonly IEmailClient _emailClient;
+    private readonly INotificationHandlersFactory _handlersFactory;
+    private readonly ILogger<NotificationsListener> _logger;
+    private readonly ServiceBusReceiver _receiver;
 
-    public NotificationsListener(ServiceBusClient serviceBusClient, IEmailClient emailClient)
+    public NotificationsListener(IAzureClientFactory<ServiceBusReceiver> clientFactory, IMessageQueueConfiguration queueConfiguration, INotificationHandlersFactory handlersFactory, ILogger<NotificationsListener> logger)
     {
-        _serviceBusClient = serviceBusClient;
-        _emailClient = emailClient;
+        _handlersFactory = handlersFactory;
+        _logger = logger;
+        _receiver = clientFactory.CreateClient(queueConfiguration.QueueName);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var processor = _serviceBusClient.CreateProcessor(queueName: "Email", new ServiceBusProcessorOptions());
+        _logger.LogInformation("Starting receiving the incoming from queue messages.", nameof(NotificationsListener));
 
-        try
+        while (!stoppingToken.IsCancellationRequested)
         {
-            processor.ProcessMessageAsync += MessageHandler;
-
-            processor.ProcessErrorAsync += ErrorHandler;
-
-            await processor.StartProcessingAsync(stoppingToken);
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                // Keep background service alive
-                await Task.Delay(TimeSpan.FromSeconds(5));
+                var message = await _receiver.ReceiveMessageAsync(maxWaitTime: TimeSpan.FromSeconds(5), cancellationToken: stoppingToken);
+                if (message == null)
+                {
+                    continue;
+                }
+
+                await HandleMessageAsync(message, stoppingToken);
+
+                await _receiver.CompleteMessageAsync(message, CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                //_receiver.AbandonMessageAsync()
+                _logger.LogError(ex, "An exception was thrown during the {Listener} execution.", nameof(NotificationsListener));
             }
         }
-        finally
-        {
-            await processor.DisposeAsync();
-        }
+
+        _logger.LogInformation("Stopping the {Listener}.", nameof(NotificationsListener));
     }
 
-    private async Task MessageHandler(ProcessMessageEventArgs args)
+    private Task HandleMessageAsync(ServiceBusReceivedMessage message, CancellationToken cancellationToken)
     {
-        var json = args.Message.Body.ToString();
-        var ticketsMessage = JsonConvert.DeserializeObject<TicketsBoughtMessage>(json);
-        if (ticketsMessage == null)
+        _logger.LogInformation("Received a message with the ID '{ID}'.", message.MessageId);
+
+        var json = message.Body.ToString();
+        var notification = JsonConvert.DeserializeObject<Notification>(json);
+        if (notification == null)
         {
-            return;
+            _logger.LogWarning("Received message with the ID '{ID}' is not of a '{Notification}' type.", nameof(Notification));
+            return Task.CompletedTask;
         }
 
-        var message = new TicketsEmailMessageBuilder();
-        foreach (var ticket in ticketsMessage.Tickets)
-        {
-            message.AddTicket(ticket);
-        }
-
-        await _emailClient.SendEmailAsync(message.Create(), CancellationToken.None);
-
-        await args.CompleteMessageAsync(args.Message);
-    }
-
-    // handle any errors when receiving messages
-    Task ErrorHandler(ProcessErrorEventArgs args)
-    {
-        Console.WriteLine(args.Exception.ToString());
-        return Task.CompletedTask;
+        var handler = _handlersFactory.Create(notification);
+        return handler.HandleAsync(notification, cancellationToken);
     }
 }

@@ -18,7 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\IWent.Notifications\IWent.Notifications.csproj" />
     <ProjectReference Include="..\IWent.Services\IWent.Services.csproj" />
   </ItemGroup>
 
