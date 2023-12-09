@@ -31,9 +31,10 @@ internal class NotificationsListener : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            // TODO: handle this message
+            var message = await _receiver.ReceiveMessageAsync(maxWaitTime: TimeSpan.FromSeconds(5), cancellationToken: stoppingToken);
             try
             {
-                var message = await _receiver.ReceiveMessageAsync(maxWaitTime: TimeSpan.FromSeconds(5), cancellationToken: stoppingToken);
                 if (message == null)
                 {
                     continue;
@@ -45,7 +46,7 @@ internal class NotificationsListener : BackgroundService
             }
             catch (Exception ex)
             {
-                //_receiver.AbandonMessageAsync()
+                await _receiver.DeadLetterMessageAsync(message, cancellationToken: stoppingToken);
                 _logger.LogError(ex, "An exception was thrown during the {Listener} execution.", nameof(NotificationsListener));
             }
         }
@@ -58,7 +59,11 @@ internal class NotificationsListener : BackgroundService
         _logger.LogInformation("Received a message with the ID '{ID}'.", message.MessageId);
 
         var json = message.Body.ToString();
-        var notification = JsonConvert.DeserializeObject<Notification>(json);
+        var notification = JsonConvert.DeserializeObject<Notification>(json, new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.All
+        });
+
         if (notification == null)
         {
             _logger.LogWarning("Received message with the ID '{ID}' is not of a '{Notification}' type.", nameof(Notification));

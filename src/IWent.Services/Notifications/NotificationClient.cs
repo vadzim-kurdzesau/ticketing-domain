@@ -22,7 +22,11 @@ public class NotificationClient : INotificationClient
     {
         var sender = _busClient.CreateSender(queueName);
 
-        var serializedMessage = JsonConvert.SerializeObject(message);
+        var serializedMessage = JsonConvert.SerializeObject(message, new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.All
+        });
+
         var queueMessage = new ServiceBusMessage(new BinaryData(serializedMessage));
 
         try

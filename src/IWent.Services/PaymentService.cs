@@ -95,7 +95,7 @@ public class PaymentService : IPaymentService
             Timestamp = DateTime.UtcNow,
             Content = new TicketsCheckoutContent
             {
-                Tickets = payment.OrderItems.Select(ToTicket),
+                Tickets = payment.OrderItems.Select(ToTicket).ToArray(),
             },
         };
 

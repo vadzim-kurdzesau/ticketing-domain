@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Web;
+using System.Xml.Linq;
 
 namespace IWent.Notifications.Email.Builders.HTML;
 
@@ -10,6 +11,7 @@ internal class HtmlEmailBodyElement : IEmailBodyElement
     {
         _element = new XElement(name);
     }
+
     public HtmlEmailBodyElement(string name, object content)
         : this(name, content.ToString())
     {
@@ -28,6 +30,6 @@ internal class HtmlEmailBodyElement : IEmailBodyElement
 
     public override string ToString()
     {
-        return _element.ToString();
+        return HttpUtility.HtmlDecode(_element.ToString());
     }
 }
