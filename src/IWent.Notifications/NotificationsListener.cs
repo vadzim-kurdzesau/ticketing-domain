@@ -31,10 +31,10 @@ internal class NotificationsListener : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            // TODO: handle this message
-            var message = await _receiver.ReceiveMessageAsync(maxWaitTime: TimeSpan.FromSeconds(5), cancellationToken: stoppingToken);
+            ServiceBusReceivedMessage? message = null;
             try
             {
+                message = await _receiver.ReceiveMessageAsync(maxWaitTime: TimeSpan.FromSeconds(5), cancellationToken: stoppingToken);
                 if (message == null)
                 {
                     continue;
@@ -46,7 +46,11 @@ internal class NotificationsListener : BackgroundService
             }
             catch (Exception ex)
             {
-                await _receiver.DeadLetterMessageAsync(message, cancellationToken: stoppingToken);
+                if (message != null)
+                {
+                    await _receiver.DeadLetterMessageAsync(message, cancellationToken: stoppingToken);
+                }
+
                 _logger.LogError(ex, "An exception was thrown during the {Listener} execution.", nameof(NotificationsListener));
             }
         }
