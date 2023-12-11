@@ -39,7 +39,9 @@ internal class NotificationsListener : BackgroundService
                     continue;
                 }
 
+                _logger.LogInformation("Received a message with the ID '{ID}'.", message.MessageId);
                 await HandleMessageAsync(message, stoppingToken);
+                _logger.LogInformation("Successfully handled the message with the ID '{ID}'.", message.MessageId);
             }
             catch (Exception ex)
             {
@@ -52,8 +54,6 @@ internal class NotificationsListener : BackgroundService
 
     private Task HandleMessageAsync(ServiceBusReceivedMessage message, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Received a message with the ID '{ID}'.", message.MessageId);
-
         var json = message.Body.ToString();
         var notification = JsonConvert.DeserializeObject<Notification>(json, new JsonSerializerSettings
         {

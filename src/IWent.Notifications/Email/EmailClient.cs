@@ -1,10 +1,12 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using IWent.Notifications.Email.Configuration;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MimeKit;
+using Polly;
 
 namespace IWent.Notifications.Email;
 
@@ -23,7 +25,15 @@ internal sealed class EmailClient : IHostedService, IEmailClient
 
     public Task SendEmailAsync(MimeMessage message, CancellationToken cancellationToken)
     {
-        return _smtpClient.SendAsync(message, cancellationToken);
+        var retryPolicy = Policy
+            .Handle<Exception>()
+            .WaitAndRetryAsync(retryCount: 3, retryAttempt =>
+            {
+                _logger.LogWarning("An error occured during the email sending. Trying to reconnect.");
+                return TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
+            });
+
+        return retryPolicy.ExecuteAsync(() => _smtpClient.SendAsync(message, cancellationToken));
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
