@@ -12,12 +12,12 @@ internal class HtmlEmailBodyElement : IEmailBodyElement
         _element = new XElement(name);
     }
 
-    public HtmlEmailBodyElement(string name, object content)
-        : this(name, content.ToString())
+    public HtmlEmailBodyElement(string name, object? content)
+        : this(name, content?.ToString())
     {
     }
 
-    public HtmlEmailBodyElement(string name, string content)
+    public HtmlEmailBodyElement(string name, string? content)
     {
         _element = new XElement(name, content);
     }

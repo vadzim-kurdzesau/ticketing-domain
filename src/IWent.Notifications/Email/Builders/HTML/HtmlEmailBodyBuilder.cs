@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Web;
 using System.Xml;
 using System.Xml.Xsl;
 
@@ -33,8 +32,7 @@ internal class HtmlEmailBodyBuilder : IEmailBodyBuilder
         {
             foreach (var element in _bodyElements)
             {
-                var e = HttpUtility.HtmlDecode(element.ToString());
-                using var elementReader = GetXmlReader((e));
+                using var elementReader = GetXmlReader(element.ToString()!);
                 _xslt.Transform(elementReader, xmlWriter);
             }
         }

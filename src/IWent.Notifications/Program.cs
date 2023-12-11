@@ -1,3 +1,4 @@
+using System.Linq;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using IWent.Notifications.Email;
@@ -20,6 +21,7 @@ public class Program
         IHost host = Host.CreateDefaultBuilder(args)
             .ConfigureServices(services =>
             {
+                services.AddHostedService<EmailClient>();
                 services.AddHostedService<NotificationsListener>();
                 services.AddConfiguration<IMessageQueueConfiguration, MessageQueueConfiguration>("MessageQueue");
                 services.AddConfiguration<IEmailClientConfiguration, EmailClientConfiguration>("Email");
@@ -33,6 +35,7 @@ public class Program
                     {
                         var serviceClient = services.GetRequiredService<ServiceBusClient>();
                         var configuration = services.GetRequiredService<IMessageQueueConfiguration>();
+                        options.ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete;
 
                         return serviceClient.CreateReceiver(configuration.QueueName, options);
                     })
@@ -41,11 +44,11 @@ public class Program
                     builder.UseCredential(new DefaultAzureCredential());
                 });
 
-                services.AddSingleton<IEmailClient, EmailClient>();
+                // Register client to authenticate in on application start
+                services.AddSingleton<IEmailClient>(services => services.GetServices<IHostedService>().OfType<EmailClient>().First());
                 services.AddTransient<INotificationHandlersFactory, NotificationHandlersFactory>();
                 services.AddTransient<CheckoutNotificationHandler>();
                 services.AddSingleton<IEmailTemplatesStorage, EmailTemplatesStorage>();
-                services.AddSingleton<IEmailClientFactory, EmailClientFactory>();
             })
             .Build();
 
