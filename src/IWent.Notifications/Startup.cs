@@ -20,6 +20,7 @@ public class Startup : FunctionsStartup
 
         builder.Services.AddConfiguration<IEmailClientConfiguration, EmailClientConfiguration>("Email");
 
+        // Had to make it transient due to internal implementation issues (supposingly)
         builder.Services.AddTransient<IEmailClient, EmailClient>();
         builder.Services.AddSingleton<INotificationHandlersFactory, NotificationHandlersFactory>();
         builder.Services.AddTransient<CheckoutNotificationHandler>();
