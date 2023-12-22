@@ -4,6 +4,7 @@ using IWent.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IWent.Persistence.Migrations
 {
     [DbContext(typeof(EventContext))]
-    partial class EventContextModelSnapshot : ModelSnapshot
+    [Migration("20231130164130_AddSeatStatusForEachSeparateEvent")]
+    partial class AddSeatStatusForEachSeparateEvent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,18 +90,15 @@ namespace IWent.Persistence.Migrations
                         .HasColumnType("int")
                         .HasColumnName("event_id");
 
-                    b.Property<int>("StateId")
+                    b.Property<int>("State")
                         .HasColumnType("int")
-                        .HasColumnName("state_id");
+                        .HasColumnName("state");
 
                     b.HasKey("SeatId", "EventId")
                         .HasName("pk_events_seats");
 
                     b.HasIndex("EventId")
                         .HasDatabaseName("ix_events_seats_event_id");
-
-                    b.HasIndex("StateId")
-                        .HasDatabaseName("ix_events_seats_state_id");
 
                     b.ToTable("events_seats", (string)null);
                 });
@@ -227,23 +227,6 @@ namespace IWent.Persistence.Migrations
                     b.ToTable("seats", (string)null);
                 });
 
-            modelBuilder.Entity("IWent.Persistence.Entities.SeatState", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id")
-                        .HasName("pk_seat_states");
-
-                    b.ToTable("seat_states", (string)null);
-                });
-
             modelBuilder.Entity("IWent.Persistence.Entities.Section", b =>
                 {
                     b.Property<int>("Id")
@@ -365,18 +348,9 @@ namespace IWent.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_events_seats_seats_seat_id");
 
-                    b.HasOne("IWent.Persistence.Entities.SeatState", "State")
-                        .WithMany()
-                        .HasForeignKey("StateId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_events_seats_seat_states_state_id");
-
                     b.Navigation("Event");
 
                     b.Navigation("Seat");
-
-                    b.Navigation("State");
                 });
 
             modelBuilder.Entity("IWent.Persistence.Entities.OrderItem", b =>
