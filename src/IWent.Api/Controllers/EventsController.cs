@@ -26,7 +26,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet("{eventId}/sections/{sectionId}/seats")]
-    public Task<IEnumerable<SectionSeat>> GetSections(int eventId, int sectionId, CancellationToken cancellationToken)
+    public Task<IEnumerable<SectionSeat>> GetSectionSeats(int eventId, int sectionId, CancellationToken cancellationToken)
     {
         return _eventsService.GetSectionSeats(eventId, sectionId, cancellationToken);
     }
