@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace IWent.Api.Filters;
 
-public class ResourceNotFoundResponseExceptionFilter : IActionFilter, IOrderedFilter
+public class ApiExceptionFilter : IActionFilter, IOrderedFilter
 {
     public int Order => int.MaxValue - 10;
 
@@ -20,6 +20,15 @@ public class ResourceNotFoundResponseExceptionFilter : IActionFilter, IOrderedFi
             context.Result = new ObjectResult(resourceDoesNotExistException.Message)
             {
                 StatusCode = StatusCodes.Status404NotFound
+            };
+
+            context.ExceptionHandled = true;
+        }
+        else if (context.Exception is not ApiException)
+        {
+            context.Result = new ObjectResult("An internal error occured.")
+            {
+                StatusCode = StatusCodes.Status500InternalServerError
             };
 
             context.ExceptionHandled = true;

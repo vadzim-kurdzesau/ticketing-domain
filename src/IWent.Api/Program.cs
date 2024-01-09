@@ -24,7 +24,7 @@ public partial class Program
 
         builder.Services.AddControllers(options =>
         {
-            options.Filters.Add<ResourceNotFoundResponseExceptionFilter>();
+            options.Filters.Add<ApiExceptionFilter>();
         });
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
