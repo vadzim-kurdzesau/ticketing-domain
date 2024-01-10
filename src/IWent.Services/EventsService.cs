@@ -28,6 +28,7 @@ public class EventsService : IEventsService
 
     public async Task<IEnumerable<Event>> GetEventsAsync(int page, int amount, CancellationToken cancellationToken)
     {
+        // Cached these events on the client side
         var events = await GetRequestEventDataQuery()
             .OrderBy(e => e.Date)
             .Skip((page - 1) * amount)
@@ -36,8 +37,10 @@ public class EventsService : IEventsService
 
         try
         {
-            var cachingTasks = events.Select(e => _cache.AddAsync(e.Id.ToString(), e, cancellationToken));
-            await Task.WhenAll(cachingTasks);
+            foreach (var task in events.Select(e => _cache.AddAsync(e.Id.ToString(), e, cancellationToken)))
+            {
+                await task;
+            }
         }
         catch (Exception ex)
         {
