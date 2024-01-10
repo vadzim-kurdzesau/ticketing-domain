@@ -20,6 +20,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet]
+    [ResponseCache(Duration = 15, VaryByQueryKeys = new string[] { "page", "size" })]
     public Task<IEnumerable<Event>> GetEvents([FromQuery] PaginationParameters parameters, CancellationToken cancellationToken)
     {
         return _eventsService.GetEventsAsync(parameters.Page, parameters.Size, cancellationToken);
