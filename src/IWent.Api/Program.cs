@@ -66,7 +66,7 @@ public partial class Program
             return new ServiceBusClient(serviceBusNamespace, credential);
         });
 
-        builder.Services.AddSingleton<INotificationClient,  NotificationClient>();
+        builder.Services.AddSingleton<INotificationClient, NotificationClient>();
 
         builder.Services.AddResponseCaching();
 

@@ -15,6 +15,11 @@ public class ApiExceptionFilter : IActionFilter, IOrderedFilter
 
     public void OnActionExecuted(ActionExecutedContext context)
     {
+        if (context.Exception == null)
+        {
+            return;
+        }
+
         if (context.Exception is ResourceDoesNotExistException resourceDoesNotExistException)
         {
             context.Result = new ObjectResult(resourceDoesNotExistException.Message)

@@ -38,7 +38,7 @@ public class OrderItem
     /// <summary>
     /// The event this item is related to.
     /// </summary>
-    public Event Event { get; set; }
+    public Event Event { get; set; } = null!;
 
     /// <summary>
     /// The chosen for this seat price option.
