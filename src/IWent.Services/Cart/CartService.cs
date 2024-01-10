@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using IWent.Persistence;
 using IWent.Persistence.Entities;
+using IWent.Services.Caching;
 using IWent.Services.DTO;
 using IWent.Services.DTO.Orders;
 using IWent.Services.DTO.Payments;
@@ -17,11 +18,13 @@ public class CartService : ICartService
 {
     private readonly ICartStorage _cartStorage;
     private readonly EventContext _eventContext;
+    private readonly ICacheService<Event> _cache;
 
-    public CartService(ICartStorage cartStorage, EventContext eventContext)
+    public CartService(ICartStorage cartStorage, EventContext eventContext, ICacheService<Event> cache)
     {
         _cartStorage = cartStorage;
         _eventContext = eventContext;
+        _cache = cache;
     }
 
     public IEnumerable<DTO.Orders.OrderItem> GetItemsInCart(string cartId)
@@ -94,6 +97,8 @@ public class CartService : ICartService
         }
 
         _cartStorage.Remove(cartId);
+        var eventsToInvalidateIds = cartSeats.Select(s => s.EventId).Distinct().ToArray();
+        await Task.WhenAll(eventsToInvalidateIds.Select(i => _cache.RemoveAsync(cartId, cancellationToken)));
 
         return new PaymentInfo
         {
