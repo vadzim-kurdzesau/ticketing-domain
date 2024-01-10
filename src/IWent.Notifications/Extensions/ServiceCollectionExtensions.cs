@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace IWent.Notifications.Extensions;
 
-public static class ServiceCollectionExtensions
+internal static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddConfiguration<TService, TImplementation>(this IServiceCollection services, string sectionName)
         where TService : class
