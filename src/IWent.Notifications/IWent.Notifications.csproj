@@ -7,6 +7,9 @@
     <DockerfileContext>..\..</DockerfileContext>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Resources\CheckoutMessageBody.xslt" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="MailKit" Version="4.3.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="5.15.0" />
@@ -20,15 +23,17 @@
     <ProjectReference Include="..\IWent.Messages\IWent.Messages.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\CheckoutMessageBody.xslt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <None Update="host.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="local.settings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
-    </None>
-    <None Update="Resources\CheckoutMessageBody.xslt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 </Project>
