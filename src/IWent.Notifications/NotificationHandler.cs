@@ -43,7 +43,7 @@ internal class NotificationHandler
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception was thrown during the {Handler} execution.", nameof(NotificationHandler));
+            _logger.LogError(ex, "An exception was thrown during the {Handler} execution: {Message}", nameof(NotificationHandler), ex.Message);
             return;
         }
 
