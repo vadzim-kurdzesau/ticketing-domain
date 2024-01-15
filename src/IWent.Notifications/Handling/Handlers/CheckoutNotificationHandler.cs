@@ -72,10 +72,11 @@ internal class CheckoutNotificationHandler : INotificationHandler
         {
             ticketsInMessage.AddNested(new HtmlEmailBodyElement("Ticket")
                 .AddNested(new HtmlEmailBodyElement("EventName", ticket.EventName))
-                .AddNested(new HtmlEmailBodyElement("Occurs", ticket.Date.ToString("G"))
+                .AddNested(new HtmlEmailBodyElement("Occurs", ticket.Date.ToString("G")))
                 .AddNested(new HtmlEmailBodyElement("Venue", ticket.Address.Street))
                 .AddNested(new HtmlEmailBodyElement("SeatNumber", ticket.Number))
-                .AddNested(new HtmlEmailBodyElement("Price", ticket.Price.Amount.ToString("#.##")))));
+                .AddNested(new HtmlEmailBodyElement("Price", ticket.Price.Amount.ToString("#.##")))
+                .AddNested(new HtmlEmailBodyElement("CompanyEmail", _clientConfiguration.Username)));
         }
 
         return messageBodyBuilder.Build();

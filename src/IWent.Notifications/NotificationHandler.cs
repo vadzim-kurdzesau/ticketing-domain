@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using IWent.Messages;
-using IWent.Notifications.Email.Builders;
 using IWent.Notifications.Handling;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;

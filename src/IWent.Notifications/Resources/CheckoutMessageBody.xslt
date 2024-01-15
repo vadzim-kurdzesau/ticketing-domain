@@ -100,7 +100,7 @@
 						</div>
 					</xsl:for-each>
 					<div class='footer'>
-						<p>Contact us at [Your Email] for any queries.</p>
+						<p>Contact us at <xsl:value-of select="CompanyEmail" /> for any queries.</p>
 					</div>
 				</div>
 			</body>
