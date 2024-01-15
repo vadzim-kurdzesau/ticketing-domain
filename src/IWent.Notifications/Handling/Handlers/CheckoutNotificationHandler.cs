@@ -16,23 +16,23 @@ namespace IWent.Notifications.Handling.Handlers;
 internal class CheckoutNotificationHandler : INotificationHandler
 {
     private readonly IEmailClient _emailClient;
-    private readonly IEmailTemplatesStorage _templatesStorage;
+    private readonly IEmailTemplatesStorageFactory _templatesStorageFactory;
     private readonly IEmailClientConfiguration _clientConfiguration;
     private readonly ILogger<CheckoutNotificationHandler> _logger;
 
     public CheckoutNotificationHandler(
         IEmailClient emailClient,
-        IEmailTemplatesStorage templatesStorage,
+        IEmailTemplatesStorageFactory templatesStorageFactory,
         IEmailClientConfiguration clientConfiguration,
         ILogger<CheckoutNotificationHandler> logger)
     {
         _emailClient = emailClient;
-        _templatesStorage = templatesStorage;
+        _templatesStorageFactory = templatesStorageFactory;
         _clientConfiguration = clientConfiguration;
         _logger = logger;
     }
 
-    public async Task HandleAsync(INotification notification, CancellationToken cancellationToken)
+    public async Task HandleAsync(INotification notification, Microsoft.Azure.WebJobs.ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         if (!notification.Parameters.TryGetValue(NotificationParameterKeys.ReceiverEmail, out var email)
             || !notification.Parameters.TryGetValue(NotificationParameterKeys.ReceiverName, out var receiverName))
@@ -52,18 +52,19 @@ internal class CheckoutNotificationHandler : INotificationHandler
             return;
         }
 
+        var templatesStorage = _templatesStorageFactory.Create(executionContext);
         var messageBuilder = new HtmlEmailMessageBuilder()
             .AddSender(_clientConfiguration.Username, _clientConfiguration.SenderName)
             .AddReceiver(email, receiverName)
             .SetSubject("Your Tickets")
-            .SetBody(await BuildNotificationMessageBodyAsync(boughtTickets, cancellationToken));
+            .SetBody(await BuildNotificationMessageBodyAsync(templatesStorage, boughtTickets, cancellationToken));
 
         await _emailClient.SendEmailAsync(messageBuilder.Create(), cancellationToken);
     }
 
-    private async ValueTask<string> BuildNotificationMessageBodyAsync(IEnumerable<Ticket> tickets, CancellationToken cancellationToken)
+    private async ValueTask<string> BuildNotificationMessageBodyAsync(IEmailTemplatesStorage templatesStorage, IEnumerable<Ticket> tickets, CancellationToken cancellationToken)
     {
-        var ticketsBody = await _templatesStorage.GetTemplateAsync("CheckoutMessageBody.xslt", cancellationToken);
+        var ticketsBody = await templatesStorage.GetTemplateAsync("CheckoutMessageBody.xslt", cancellationToken);
         var messageBodyBuilder = new HtmlEmailBodyBuilder(ticketsBody);
         var ticketsInMessage = new HtmlEmailBodyElement("Tickets");
 

@@ -45,7 +45,7 @@ internal class NotificationHandler
             }
 
             var handler = _handlersFactory.Create(notification);
-            await handler.HandleAsync(notification, CancellationToken.None);
+            await handler.HandleAsync(notification, executionContext, CancellationToken.None);
         }
         catch (Exception ex)
         {
