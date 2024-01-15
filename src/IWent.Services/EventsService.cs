@@ -28,24 +28,11 @@ public class EventsService : IEventsService
 
     public async Task<IEnumerable<Event>> GetEventsAsync(int page, int amount, CancellationToken cancellationToken)
     {
-        // Cached these events on the client side
         var events = await GetRequestEventDataQuery()
             .OrderBy(e => e.Date)
             .Skip((page - 1) * amount)
             .Take(amount)
             .ToListAsync(cancellationToken);
-
-        try
-        {
-            foreach (var task in events.Select(e => _cache.AddAsync(e.Id.ToString(), e, cancellationToken)))
-            {
-                await task;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An exception was thrown while caching the events.");
-        }
 
         return events.Select(ToDTO);
     }
@@ -67,7 +54,15 @@ public class EventsService : IEventsService
             throw new ResourceDoesNotExistException($"Event with the ID '{eventId}' does not exist.");
         }
 
-        await _cache.AddAsync(eventId.ToString(), @event, cancellationToken);
+        try
+        {
+            await _cache.AddAsync(eventId.ToString(), @event, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Caching errors must not prevent successful responses.
+            _logger.LogError(ex, "An exception was thrown during the event '{EventId}' caching.", eventId);
+        }
 
         return ToSectionSeatsDTO(@event, sectionId);
     }

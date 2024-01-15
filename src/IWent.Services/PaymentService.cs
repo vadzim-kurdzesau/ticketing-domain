@@ -78,10 +78,10 @@ public class PaymentService : IPaymentService
             orderItem.Seat.StateId = SeatStatus.Sold;
         }
 
+        await _eventContext.SaveChangesAsync(cancellationToken);
+
         try
         {
-            await _eventContext.SaveChangesAsync(cancellationToken);
-
             var message = new Notification
             {
                 Id = Guid.NewGuid(),
@@ -98,11 +98,12 @@ public class PaymentService : IPaymentService
                 },
             };
 
+            // TODO: add retry logic
             await _notificationClient.SendMessageAsync(message, "Notifications", cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred during the order payment completion.");
+            _logger.LogError(ex, "An error occurred during the notification publishing.");
         }
     }
 

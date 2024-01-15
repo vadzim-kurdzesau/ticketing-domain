@@ -25,12 +25,6 @@ internal class NotificationHandler
     public async Task Handle([ServiceBusTrigger("Notifications", Connection = "ServiceBusConnection")] string notificationsItem, string messageId, Microsoft.Azure.WebJobs.ExecutionContext executionContext)
     {
         _logger.LogInformation("Received a message with the ID '{ID}'.", messageId);
-        if (Constants.AppDirectoryPath == null)
-        {
-            // TODO: temporary workaround
-            Constants.AppDirectoryPath = executionContext.FunctionAppDirectory;
-        }
-
         try
         {
             var notification = JsonConvert.DeserializeObject<Notification>(notificationsItem, new JsonSerializerSettings
