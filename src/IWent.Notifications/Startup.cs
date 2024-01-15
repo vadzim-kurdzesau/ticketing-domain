@@ -24,6 +24,6 @@ public class Startup : FunctionsStartup
         builder.Services.AddTransient<IEmailClient, EmailClient>();
         builder.Services.AddSingleton<INotificationHandlersFactory, NotificationHandlersFactory>();
         builder.Services.AddTransient<CheckoutNotificationHandler>();
-        builder.Services.AddSingleton<IEmailTemplatesStorageFactory, EmailTemplatesStorageFactory>();
+        builder.Services.AddSingleton<IEmailTemplatesStorage, EmailTemplatesStorage>();
     }
 }

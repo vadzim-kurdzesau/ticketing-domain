@@ -5,5 +5,5 @@ namespace IWent.Notifications.Email.Builders.Templates;
 
 internal interface IEmailTemplatesStorage
 {
-    ValueTask<string> GetTemplateAsync(string templateName, CancellationToken cancellationToken);
+    ValueTask<string> GetTemplateAsync(string appDirectoryPath, string templateName, CancellationToken cancellationToken);
 }
