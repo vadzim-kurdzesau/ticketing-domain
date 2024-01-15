@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using IWent.Messages;
+using IWent.Notifications.Email.Builders;
 using IWent.Notifications.Handling;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
@@ -21,9 +22,14 @@ internal class NotificationHandler
     }
 
     [FunctionName(nameof(Handle))]
-    public async Task Handle([ServiceBusTrigger("Notifications", Connection = "ServiceBusConnection")] string notificationsItem, string messageId)
+    public async Task Handle([ServiceBusTrigger("Notifications", Connection = "ServiceBusConnection")] string notificationsItem, string messageId, Microsoft.Azure.WebJobs.ExecutionContext executionContext)
     {
         _logger.LogInformation("Received a message with the ID '{ID}'.", messageId);
+        if (Constants.AppDirectoryPath == null)
+        {
+            // TODO: temporary workaround
+            Constants.AppDirectoryPath = executionContext.FunctionAppDirectory;
+        }
 
         try
         {

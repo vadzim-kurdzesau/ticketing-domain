@@ -5,7 +5,9 @@ namespace IWent.Notifications.Email.Builders;
 
 internal static class Constants
 {
-    private static string _resourceFolderPath = Path.Combine(Environment.CurrentDirectory, "Resources");
+    private static string _resourceFolderPath = Path.Combine(AppDirectoryPath, "Resources");
+
+    public static string AppDirectoryPath { get; set; }
 
     public static string ResourceFolderPath => _resourceFolderPath;
 }
