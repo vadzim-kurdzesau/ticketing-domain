@@ -14,6 +14,7 @@ using IWent.Services.DTO.Payments;
 using IWent.Services.Exceptions;
 using IWent.Services.Extensions;
 using IWent.Services.Notifications;
+using IWent.Services.Notifications.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -23,12 +24,14 @@ public class PaymentService : IPaymentService
 {
     private readonly EventContext _eventContext;
     private readonly INotificationClient _notificationClient;
+    private readonly IBusConnectionConfiguration _busConfiguration;
     private readonly ILogger<PaymentService> _logger;
 
-    public PaymentService(EventContext eventContext, INotificationClient notificationClient, ILogger<PaymentService> logger)
+    public PaymentService(EventContext eventContext, INotificationClient notificationClient, IBusConnectionConfiguration busConfiguration, ILogger<PaymentService> logger)
     {
         _eventContext = eventContext;
         _notificationClient = notificationClient;
+        _busConfiguration = busConfiguration;
         _logger = logger;
     }
 
@@ -99,7 +102,7 @@ public class PaymentService : IPaymentService
             };
 
             // TODO: add retry logic
-            await _notificationClient.SendMessageAsync(message, "Notifications", cancellationToken);
+            await _notificationClient.SendMessageAsync(message, _busConfiguration.QueueName, cancellationToken);
         }
         catch (Exception ex)
         {

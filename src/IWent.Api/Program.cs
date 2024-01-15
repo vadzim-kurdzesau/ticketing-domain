@@ -1,13 +1,15 @@
-using System;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
+using IWent.Api.Extensions;
 using IWent.Api.Filters;
+using IWent.Api.HealthChecks;
 using IWent.Persistence;
 using IWent.Services;
 using IWent.Services.Caching;
 using IWent.Services.Cart;
 using IWent.Services.DTO;
 using IWent.Services.Notifications;
+using IWent.Services.Notifications.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -45,12 +47,9 @@ public partial class Program
         builder.Services.AddScoped<IPaymentService, PaymentService>();
         builder.Services.AddSingleton<ICartStorage, InMemoryCartStorage>();
         builder.Services.AddSingleton(typeof(ICacheService<>), typeof(CacheService<>));
-        builder.Services.AddTransient<ICacheConfiguration, CacheConfiguration>(services =>
-        {
-            var configuration = services.GetRequiredService<IConfiguration>();
-            return configuration.GetRequiredSection("Caching").Get<CacheConfiguration>()
-                ?? throw new InvalidOperationException($"Unable to get the '{typeof(CacheConfiguration)}' from configuration.");
-        });
+
+        builder.Services.AddConfiguration<ICacheConfiguration, CacheConfiguration>("Caching");
+        builder.Services.AddConfiguration<IBusConnectionConfiguration, BusConnectionConfiguration>("BusConnection");
 
         builder.Services.AddDistributedSqlServerCache(options =>
         {
@@ -59,18 +58,32 @@ public partial class Program
             options.TableName = "EventsCache";
         });
 
-        builder.Services.AddSingleton<ServiceBusClient>(provider =>
+        builder.Services.AddSingleton<ServiceBusClient>(services =>
         {
-            var serviceBusNamespace = "ticketing-system-bus.servicebus.windows.net";
+            var busConfiguration = services.GetRequiredService<IBusConnectionConfiguration>();
             var credential = new DefaultAzureCredential(includeInteractiveCredentials: true);
-            return new ServiceBusClient(serviceBusNamespace, credential);
+            return new ServiceBusClient(busConfiguration.Namespace, credential);
         });
 
         builder.Services.AddSingleton<INotificationClient, NotificationClient>();
 
         builder.Services.AddResponseCaching();
+        builder.Services.AddHealthChecks()
+            .AddCheck<AvailabilityCheck>("Availability")
+            .AddDbContextCheck<EventContext>("Database Availability")
+            .AddAzureServiceBusQueue(fullyQualifiedNamespaceFactory: services =>
+            {
+                var busConfiguration = services.GetRequiredService<IBusConnectionConfiguration>();
+                return busConfiguration.Namespace;
+            }, queueNameFactory: services =>
+            {
+                var busConfiguration = services.GetRequiredService<IBusConnectionConfiguration>();
+                return busConfiguration.QueueName;
+            }, tokenCredentialFactory: _ => new DefaultAzureCredential(), name: "Service Bus Availability");
 
         var app = builder.Build();
+
+        app.MapHealthChecks("/health");
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
