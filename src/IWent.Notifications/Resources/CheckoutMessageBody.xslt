@@ -61,7 +61,7 @@
 					<div class='header'>
 						<h2>Your Ticket Information</h2>
 					</div>
-					<h3>Dear [Customer Name],</h3>
+					<h3>Dear <xsl:value-of select="CustomerName" /></h3>
 					<p>Thank you for your purchase. Below are the details of your tickets:</p>
 					<xsl:for-each select="Tickets/Ticket">
 						<div class='ticket-info'>
@@ -100,7 +100,7 @@
 						</div>
 					</xsl:for-each>
 					<div class='footer'>
-						<p>Contact us at [Your Email] for any queries.</p>
+						<p>Contact us at <xsl:value-of select="CompanyEmail" /> for any queries.</p>
 					</div>
 				</div>
 			</body>

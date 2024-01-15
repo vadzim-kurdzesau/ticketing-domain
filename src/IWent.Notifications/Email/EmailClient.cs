@@ -3,14 +3,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using IWent.Notifications.Email.Configuration;
 using MailKit.Net.Smtp;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MimeKit;
 using Polly;
 
 namespace IWent.Notifications.Email;
 
-internal sealed class EmailClient : IHostedService, IEmailClient
+internal sealed class EmailClient : IEmailClient, IDisposable
 {
     private readonly ISmtpClient _smtpClient;
     private readonly IEmailClientConfiguration _clientConfiguration;
@@ -33,22 +32,28 @@ internal sealed class EmailClient : IHostedService, IEmailClient
                 return TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
             });
 
-        return retryPolicy.ExecuteAsync(() => _smtpClient.SendAsync(message, cancellationToken));
+        return retryPolicy.ExecuteAsync(async () =>
+        {
+            if (!_smtpClient.IsConnected)
+            {
+                _logger.LogInformation("Trying to connect to the mail server.");
+                await _smtpClient.ConnectAsync(_clientConfiguration.Host, _clientConfiguration.Port, useSsl: true, cancellationToken);
+                _logger.LogInformation("Successfully connected to the mail server.");
+            }
+
+            if (!_smtpClient.IsAuthenticated)
+            {
+                _logger.LogInformation("Trying to authenticate the mail server connection.");
+                await _smtpClient.AuthenticateAsync(_clientConfiguration.Username, _clientConfiguration.Password, cancellationToken);
+                _logger.LogInformation("Successfully authenticated the mail server connection.");
+            }
+
+            await _smtpClient.SendAsync(message, cancellationToken);
+        });
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public void Dispose()
     {
-        _logger.LogInformation("Trying to connect to the mail server.");
-        await _smtpClient.ConnectAsync(_clientConfiguration.Host, _clientConfiguration.Port, useSsl: true, cancellationToken);
-        _logger.LogInformation("Successfully connected to the mail server.");
-
-        _logger.LogInformation("Trying to authenticate the mail server connection.");
-        await _smtpClient.AuthenticateAsync(_clientConfiguration.Username, _clientConfiguration.Password, cancellationToken);
-        _logger.LogInformation("Successfully authenticated the mail server connection.");
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        return _smtpClient.DisconnectAsync(quit: true, cancellationToken);
+        _smtpClient.Dispose();
     }
 }

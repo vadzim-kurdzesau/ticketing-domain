@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
@@ -26,7 +25,7 @@ public class CacheService<T> : ICacheService<T>
 
         return _cache.SetStringAsync(key, serializedEntry, new DistributedCacheEntryOptions
         {
-            SlidingExpiration = _cacheConfiguration.SlidingExpiration
+            AbsoluteExpirationRelativeToNow = _cacheConfiguration.AbsoluteExpiration,
         }, cancellationToken);
     }
 

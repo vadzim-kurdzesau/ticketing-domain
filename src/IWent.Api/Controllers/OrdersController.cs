@@ -20,13 +20,13 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("carts/{cartId}")]
-    public IEnumerable<OrderItem> GetCartItems(string cartId)
+    public IEnumerable<OrderItem> GetCartItemsAsync(string cartId)
     {
         return _cartService.GetItemsInCart(cartId);
     }
 
     [HttpPost("carts/{cartId}")]
-    public async Task<IActionResult> AddToCart(string cartId, OrderItem item, CancellationToken cancellationToken)
+    public async Task<IActionResult> AddToCartAsync(string cartId, OrderItem item, CancellationToken cancellationToken)
     {
         try
         {
@@ -39,14 +39,14 @@ public class OrdersController : ControllerBase
     }
 
     [HttpDelete("carts/{cartId}/events/{eventId}/seats/{seatId}")]
-    public IActionResult RemoveFromCart(string cartId, int eventId, int seatId)
+    public IActionResult RemoveFromCartAsync(string cartId, int eventId, int seatId)
     {
         _cartService.RemoveFromCart(cartId, eventId, seatId);
         return Ok();
     }
 
     [HttpPut("carts/{cartId}/book")]
-    public async Task<IActionResult> BookSeats(string cartId, CancellationToken cancellationToken)
+    public async Task<IActionResult> BookSeatsAsync(string cartId, CancellationToken cancellationToken)
     {
         var paymentInfo = await _cartService.BookSeatsAsync(cartId, cancellationToken);
         return Ok(paymentInfo);

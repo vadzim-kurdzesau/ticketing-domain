@@ -6,5 +6,5 @@ namespace IWent.Notifications.Handling.Handlers;
 
 internal interface INotificationHandler
 {
-    Task HandleAsync(INotification notification, CancellationToken cancellationToken);
+    Task HandleAsync(INotification notification, Microsoft.Azure.WebJobs.ExecutionContext executionContext, CancellationToken cancellationToken);
 }

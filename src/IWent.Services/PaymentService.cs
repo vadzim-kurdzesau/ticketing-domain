@@ -14,7 +14,9 @@ using IWent.Services.DTO.Payments;
 using IWent.Services.Exceptions;
 using IWent.Services.Extensions;
 using IWent.Services.Notifications;
+using IWent.Services.Notifications.Configuration;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace IWent.Services;
 
@@ -22,11 +24,15 @@ public class PaymentService : IPaymentService
 {
     private readonly EventContext _eventContext;
     private readonly INotificationClient _notificationClient;
+    private readonly IBusConnectionConfiguration _busConfiguration;
+    private readonly ILogger<PaymentService> _logger;
 
-    public PaymentService(EventContext eventContext, INotificationClient notificationClient)
+    public PaymentService(EventContext eventContext, INotificationClient notificationClient, IBusConnectionConfiguration busConfiguration, ILogger<PaymentService> logger)
     {
         _eventContext = eventContext;
         _notificationClient = notificationClient;
+        _busConfiguration = busConfiguration;
+        _logger = logger;
     }
 
     public async Task<PaymentInfo> GetPaymentInfoAsync(string paymentId, CancellationToken cancellationToken)
@@ -46,10 +52,7 @@ public class PaymentService : IPaymentService
 
     public async Task CompletePaymentAsync(string paymentId, CancellationToken cancellationToken)
     {
-        Payment? payment;
-        using (var transaction = _eventContext.Database.BeginTransaction())
-        {
-            payment = await _eventContext.Payments.Where(p => p.Id == paymentId)
+        var payment = await _eventContext.Payments.Where(p => p.Id == paymentId)
                 .Include(p => p.OrderItems)
                 .ThenInclude(i => i.Seat)
                 .ThenInclude(s => s.Seat)
@@ -62,74 +65,81 @@ public class PaymentService : IPaymentService
                 .ThenInclude(p => p.Price)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (payment == null)
-            {
-                throw new ResourceDoesNotExistException($"Payment with the ID '{paymentId}' does not exist.");
-            }
-
-            if (payment.Status != Persistence.Entities.PaymentStatus.Pending)
-            {
-                throw new CannotChangePaymentStatusException("Cannot change status of a non-pending payment.");
-            }
-
-            payment.Status = Persistence.Entities.PaymentStatus.Completed;
-            foreach (var orderItem in payment.OrderItems)
-            {
-                orderItem.Seat.StateId = SeatStatus.Sold;
-            }
-
-            await _eventContext.SaveChangesAsync(cancellationToken);
-
-            transaction.Commit();
+        if (payment == null)
+        {
+            throw new ResourceDoesNotExistException($"Payment with the ID '{paymentId}' does not exist.");
         }
 
-        var message = new Notification
+        if (payment.Status != Persistence.Entities.PaymentStatus.Pending)
         {
-            Id = Guid.NewGuid(),
-            Operation = Operation.Checkout,
-            Parameters = new Dictionary<string, string>()
-            {
-                { NotificationParameterKeys.ReceiverEmail, "ticketstestformeonly@mailinator.com" },
-                { NotificationParameterKeys.ReceiverName, "Nick" },
-            }.ToImmutableDictionary(),
-            Timestamp = DateTime.UtcNow,
-            Content = new TicketsCheckoutContent
-            {
-                Tickets = payment.OrderItems.Select(ToTicket).ToArray(),
-            },
-        };
+            throw new CannotChangePaymentStatusException("Cannot change status of a non-pending payment.");
+        }
 
-        await _notificationClient.SendMessageAsync(message, "Notifications", cancellationToken);
+        payment.Status = Persistence.Entities.PaymentStatus.Completed;
+        foreach (var orderItem in payment.OrderItems)
+        {
+            orderItem.Seat.StateId = SeatStatus.Sold;
+        }
+
+        await _eventContext.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            var message = new Notification
+            {
+                Id = Guid.NewGuid(),
+                Operation = Operation.Checkout,
+                Parameters = new Dictionary<string, string>()
+                {
+                    { NotificationParameterKeys.ReceiverEmail, "ticketstestformeonly@mailinator.com" },
+                    { NotificationParameterKeys.ReceiverName, "Nick" },
+                }.ToImmutableDictionary(),
+                Timestamp = DateTime.UtcNow,
+                Content = new TicketsCheckoutContent
+                {
+                    Tickets = payment.OrderItems.Select(ToTicket).ToArray(),
+                },
+            };
+
+            // TODO: add retry logic
+            await _notificationClient.SendMessageAsync(message, _busConfiguration.QueueName, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred during the notification publishing.");
+        }
     }
 
     public async Task FailOrderPaymentAsync(string paymentId, CancellationToken cancellationToken)
     {
-        using (var transaction = _eventContext.Database.BeginTransaction())
+        var payment = await _eventContext.Payments.Where(p => p.Id == paymentId)
+            .Include(p => p.OrderItems)
+            .ThenInclude(p => p.Seat)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (payment == null)
         {
-            var payment = await _eventContext.Payments.Where(p => p.Id == paymentId)
-                .Include(p => p.OrderItems)
-                .ThenInclude(p => p.Seat)
-                .FirstOrDefaultAsync(cancellationToken);
+            throw new ResourceDoesNotExistException($"Payment with the ID '{paymentId}' does not exist.");
+        }
 
-            if (payment == null)
-            {
-                throw new ResourceDoesNotExistException($"Payment with the ID '{paymentId}' does not exist.");
-            }
+        if (payment.Status != Persistence.Entities.PaymentStatus.Pending)
+        {
+            throw new CannotChangePaymentStatusException("Cannot change status of a non-pending payment.");
+        }
 
-            if (payment.Status != Persistence.Entities.PaymentStatus.Pending)
-            {
-                throw new CannotChangePaymentStatusException("Cannot change status of a non-pending payment.");
-            }
+        payment.Status = Persistence.Entities.PaymentStatus.Failed;
+        foreach (var orderItem in payment.OrderItems)
+        {
+            orderItem.Seat.StateId = SeatStatus.Available;
+        }
 
-            payment.Status = Persistence.Entities.PaymentStatus.Failed;
-            foreach (var orderItem in payment.OrderItems)
-            {
-                orderItem.Seat.StateId = SeatStatus.Available;
-            }
-
+        try
+        {
             await _eventContext.SaveChangesAsync(cancellationToken);
-
-            transaction.Commit();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred during the order payment failing.");
         }
     }
 

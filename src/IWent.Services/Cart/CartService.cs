@@ -11,6 +11,7 @@ using IWent.Services.DTO.Orders;
 using IWent.Services.DTO.Payments;
 using IWent.Services.Exceptions;
 using IWent.Services.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace IWent.Services.Cart;
 
@@ -19,12 +20,14 @@ public class CartService : ICartService
     private readonly ICartStorage _cartStorage;
     private readonly EventContext _eventContext;
     private readonly ICacheService<Event> _cache;
+    private readonly ILogger<CartService> _logger;
 
-    public CartService(ICartStorage cartStorage, EventContext eventContext, ICacheService<Event> cache)
+    public CartService(ICartStorage cartStorage, EventContext eventContext, ICacheService<Event> cache, ILogger<CartService> logger)
     {
         _cartStorage = cartStorage;
         _eventContext = eventContext;
         _cache = cache;
+        _logger = logger;
     }
 
     public IEnumerable<DTO.Orders.OrderItem> GetItemsInCart(string cartId)
@@ -43,7 +46,7 @@ public class CartService : ICartService
 
         if (seat.StateId != SeatStatus.Available)
         {
-            throw new ApiException($"Seat  with the id '{orderItem.SeatId}' for the event with the id '{orderItem.EventId}' already has been booked.");
+            throw new SeatAlreadyBookedException($"Seat  with the id '{orderItem.SeatId}' for the event with the id '{orderItem.EventId}' already has been booked.");
         }
 
         var cart = _cartStorage.GetOrCreate(cartId);
@@ -109,9 +112,19 @@ public class CartService : ICartService
             transaction.Commit();
         }
 
-        _cartStorage.Remove(cartId);
-        var eventsToInvalidateIds = cartSeats.Select(s => s.EventId).Distinct().ToArray();
-        await Task.WhenAll(eventsToInvalidateIds.Select(i => _cache.RemoveAsync(cartId, cancellationToken)));
+        try
+        {
+            _cartStorage.Remove(cartId);
+            var eventsToInvalidateIds = cartSeats.Select(s => s.EventId).Distinct().ToArray();
+            foreach (var task in eventsToInvalidateIds.Select(i => _cache.RemoveAsync(cartId, cancellationToken)))
+            {
+                await task;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An exception was thrown during the '{CartId}' cache cleaning.", cartId);
+        }
 
         return new PaymentInfo
         {

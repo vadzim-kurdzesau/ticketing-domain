@@ -2,15 +2,14 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IWent.Notifications.Extensions;
+namespace IWent.Api.Extensions;
 
 internal static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddConfiguration<TService, TImplementation>(this IServiceCollection services, string sectionName)
-        where TService : class
-        where TImplementation : class, TService
+    public static IServiceCollection AddConfiguration<TInterface, TImplementation>(this IServiceCollection services, string sectionName)
+        where TImplementation : class, TInterface where TInterface : class
     {
-        return services.AddTransient<TService, TImplementation>(services =>
+        return services.AddTransient<TInterface, TImplementation>(services =>
         {
             var configuration = services.GetRequiredService<IConfiguration>();
             return configuration.GetRequiredSection(sectionName).Get<TImplementation>()

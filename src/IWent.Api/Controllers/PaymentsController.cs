@@ -17,7 +17,7 @@ public class PaymentsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetPaymentInfo(string paymentId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetPaymentInfoAsync(string paymentId, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(paymentId))
         {
@@ -28,7 +28,7 @@ public class PaymentsController : ControllerBase
     }
 
     [HttpPost("{paymentId}/complete")]
-    public async Task<IActionResult> CompleteOrderPayment(string paymentId, CancellationToken cancellationToken)
+    public async Task<IActionResult> CompleteOrderPaymentAsync(string paymentId, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(paymentId))
         {
@@ -40,7 +40,7 @@ public class PaymentsController : ControllerBase
     }
 
     [HttpPost("{paymentId}/failed")]
-    public async Task<IActionResult> FailOrderPayment(string paymentId, CancellationToken cancellationToken)
+    public async Task<IActionResult> FailOrderPaymentAsync(string paymentId, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(paymentId))
         {

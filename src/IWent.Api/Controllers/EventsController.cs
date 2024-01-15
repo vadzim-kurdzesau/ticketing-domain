@@ -21,13 +21,13 @@ public class EventsController : ControllerBase
 
     [HttpGet]
     [ResponseCache(Duration = 15, VaryByQueryKeys = new string[] { "page", "size" })]
-    public Task<IEnumerable<Event>> GetEvents([FromQuery] PaginationParameters parameters, CancellationToken cancellationToken)
+    public Task<IEnumerable<Event>> GetEventsAsync([FromQuery] PaginationParameters parameters, CancellationToken cancellationToken)
     {
         return _eventsService.GetEventsAsync(parameters.Page, parameters.Size, cancellationToken);
     }
 
     [HttpGet("{eventId}/sections/{sectionId}/seats")]
-    public Task<IEnumerable<SectionSeat>> GetSectionSeats(int eventId, int sectionId, CancellationToken cancellationToken)
+    public Task<IEnumerable<SectionSeat>> GetSectionSeatsAsync(int eventId, int sectionId, CancellationToken cancellationToken)
     {
         return _eventsService.GetSectionSeats(eventId, sectionId, cancellationToken);
     }
