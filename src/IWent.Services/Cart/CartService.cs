@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using IWent.BookingTimer.Messages;
 using IWent.Persistence;
 using IWent.Persistence.Entities;
 using IWent.Services.Caching;
@@ -11,6 +12,7 @@ using IWent.Services.DTO.Orders;
 using IWent.Services.DTO.Payments;
 using IWent.Services.Exceptions;
 using IWent.Services.Extensions;
+using IWent.Services.Notifications;
 using Microsoft.Extensions.Logging;
 
 namespace IWent.Services.Cart;
@@ -20,13 +22,20 @@ public class CartService : ICartService
     private readonly ICartStorage _cartStorage;
     private readonly EventContext _eventContext;
     private readonly ICacheService<Event> _cache;
+    private readonly INotificationClient _notificationClient;
     private readonly ILogger<CartService> _logger;
 
-    public CartService(ICartStorage cartStorage, EventContext eventContext, ICacheService<Event> cache, ILogger<CartService> logger)
+    public CartService(
+        ICartStorage cartStorage,
+        EventContext eventContext,
+        ICacheService<Event> cache,
+        INotificationClient notificationClient,
+        ILogger<CartService> logger)
     {
         _cartStorage = cartStorage;
         _eventContext = eventContext;
         _cache = cache;
+        _notificationClient = notificationClient;
         _logger = logger;
     }
 
@@ -125,6 +134,14 @@ public class CartService : ICartService
         {
             _logger.LogError(ex, "An exception was thrown during the '{CartId}' cache cleaning.", cartId);
         }
+
+        var startTimerMessage = new BookingTimerMessage
+        {
+            BookingNumber = order.Id,
+            Action = TimerAction.Start
+        };
+
+        await _notificationClient.SendMessageAsync(startTimerMessage, "Bookings", cancellationToken);
 
         return new PaymentInfo
         {
