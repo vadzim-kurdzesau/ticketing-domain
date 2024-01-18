@@ -20,10 +20,9 @@ public class ServiceBusListener : BackgroundService
     public ServiceBusListener(
         IAzureClientFactory<ServiceBusReceiver> clientFactory,
         IBackgroundQueue<BookingTimerMessage> backgroundQueue,
-        BusConfiguration configuration,
         ILogger<ServiceBusListener> logger)
     {
-        _receiver = clientFactory.CreateClient(configuration.QueueName);
+        _receiver = clientFactory.CreateClient(Constants.ServiceBusReceiverName);
         _processingQueue = backgroundQueue;
         _logger = logger;
     }

@@ -1,6 +1,10 @@
 ﻿namespace IWent.BookingTimer.Configuration;
 
-public class BusConfiguration
+public class BusConfiguration : IBusConfiguration
 {
-    public string QueueName { get; set; } = null!;
+    public string Namespace { get; init; } = null!;
+
+    public string ReceiverQueueName { get; init; } = null!;
+
+    public string SenderQueueName { get; init; } = null!;
 }

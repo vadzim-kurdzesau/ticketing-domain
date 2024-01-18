@@ -7,9 +7,9 @@ using IWent.BookingTimer.Messages;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace IWent.BookingTimer.Handling;
+namespace IWent.BookingTimer.Handling.Timers;
 
-internal class BookingTimer : BackgroundService
+public class BookingTimer : BackgroundService
 {
     private readonly ServiceBusSender _busSender;
     private readonly string _bookingId;
@@ -24,14 +24,22 @@ internal class BookingTimer : BackgroundService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Event that is triggered when the timer expires.
+    /// </summary>
+    public event EventHandler<TimerExpiredEventArgs>? Expired;
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var timer = new PeriodicTimer(_expiresAfter);
-        await timer.WaitForNextTickAsync(stoppingToken);
+        using var timer = new PeriodicTimer(_expiresAfter);
 
-        // If the timer was manually cancelled
-        if (stoppingToken.IsCancellationRequested)
+        try
         {
+            await timer.WaitForNextTickAsync(stoppingToken);
+        }
+        catch (TaskCanceledException) // If the timer was manually cancelled
+        {
+            _logger.LogInformation("AAAAAAAAAAAAAAAAAAA");
             return;
         }
 
@@ -45,11 +53,18 @@ internal class BookingTimer : BackgroundService
 
         try
         {
-            await _busSender.SendMessageAsync(message);
+            await _busSender.SendMessageAsync(message, CancellationToken.None);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An exception was thrown during the message send.");
         }
+
+        OnExpired();
+    }
+
+    protected virtual void OnExpired()
+    {
+        Expired?.Invoke(this, new TimerExpiredEventArgs { BookingId = _bookingId });
     }
 }
