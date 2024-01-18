@@ -47,7 +47,7 @@ public class ServiceBusListener : BackgroundService
             }
             catch (Exception ex)
             {
-                // Thrown exceptions should not stop the application from working.
+                // Thrown exceptions should not stop the listener from working.
                 _logger.LogError(ex, "An exception was thrown during the service bus messages receiving.");
             }
         }

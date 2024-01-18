@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using IWent.BookingTimer.Messages;
@@ -29,42 +30,48 @@ internal class MessageHandler : BackgroundService
         {
             try
             {
-                var message = await _processingQueue.DequeueAsync(stoppingToken);
-
-                if (_timers.TryGetValue(message.BookingNumber, out var existingTimer))
-                {
-                    if (message.Action != TimerAction.Stop)
-                    {
-                        _logger.LogWarning("Received a 'Start' request for already running timer '{TimerId}'.", message.BookingNumber);
-                        continue;
-                    }
-
-                    _timers.TryRemove(message.BookingNumber, out _);
-                    await existingTimer.StopAsync(stoppingToken);
-                    _logger.LogInformation("Stopped the timer for booking '{BookingId}'.", message.BookingNumber);
-                    continue;
-                }
-
-                if (message.Action == TimerAction.Stop)
-                {
-                    _logger.LogWarning("Received a stopping request for non-existing timer '{TimerId}'.", message.BookingNumber);
-                    continue;
-                }
-
-                var newBookingTimer = _timerFactory.Create(message.BookingNumber);
-                newBookingTimer.Expired += RemoveTimer;
-                await newBookingTimer.StartAsync(stoppingToken);
-
-                _timers.TryAdd(message.BookingNumber, newBookingTimer);
-                _logger.LogInformation("Started the timer for booking '{BookingId}'.", message.BookingNumber);
+                await ListenForMessagesAsync(stoppingToken);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex, "AAAAAAAAAA");
+                // Thrown exceptions should not stop the message handler from working.
+                _logger.LogError(ex, "An exception was thrown during message handling.");
             }
         }
 
         _logger.LogInformation("Message handler has been stopped.");
+    }
+
+    private async Task ListenForMessagesAsync(CancellationToken stoppingToken)
+    {
+        var message = await _processingQueue.DequeueAsync(stoppingToken);
+
+        if (_timers.TryGetValue(message.BookingNumber, out var existingTimer))
+        {
+            if (message.Action != TimerAction.Stop)
+            {
+                _logger.LogWarning("Received a 'Start' request for already running timer '{TimerId}'.", message.BookingNumber);
+                return;
+            }
+
+            _timers.TryRemove(message.BookingNumber, out _);
+            await existingTimer.StopAsync(stoppingToken);
+            _logger.LogInformation("Stopped the timer for booking '{BookingId}'.", message.BookingNumber);
+            return;
+        }
+
+        if (message.Action == TimerAction.Stop)
+        {
+            _logger.LogWarning("Received a stopping request for non-existing timer '{TimerId}'.", message.BookingNumber);
+            return;
+        }
+
+        var newBookingTimer = _timerFactory.Create(message.BookingNumber);
+        newBookingTimer.Expired += RemoveTimer;
+        await newBookingTimer.StartAsync(stoppingToken);
+
+        _timers.TryAdd(message.BookingNumber, newBookingTimer);
+        _logger.LogInformation("Started the timer for booking '{BookingId}'.", message.BookingNumber);
     }
 
     private void RemoveTimer(object? sender, TimerExpiredEventArgs eventArgs)
