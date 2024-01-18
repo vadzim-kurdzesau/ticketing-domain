@@ -29,7 +29,7 @@ public class ServiceBusListener : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Service bus listener has been started .");
+        _logger.LogInformation("Service bus listener has been started.");
         while (!stoppingToken.IsCancellationRequested)
         {
             try

@@ -6,15 +6,18 @@ using IWent.Persistence;
 using IWent.Services;
 using IWent.Services.Caching;
 using IWent.Services.Cart;
+using IWent.Services.Constants;
 using IWent.Services.DTO;
 using IWent.Services.Notifications;
 using IWent.Services.Notifications.Configuration;
 using IWent.Shared.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.VisualBasic;
 
 namespace IWent.Api;
 
@@ -58,11 +61,31 @@ public partial class Program
             options.TableName = "EventsCache";
         });
 
-        builder.Services.AddSingleton<ServiceBusClient>(services =>
+        var busConfiguration = builder.Services.BuildServiceProvider()
+            .GetRequiredService<IBusConnectionConfiguration>();
+        builder.Services.AddAzureClients(factoryBuilder =>
         {
-            var busConfiguration = services.GetRequiredService<IBusConnectionConfiguration>();
-            var credential = new DefaultAzureCredential(includeInteractiveCredentials: true);
-            return new ServiceBusClient(busConfiguration.Namespace, credential);
+            factoryBuilder.AddServiceBusClientWithNamespace(busConfiguration.Namespace);
+
+            factoryBuilder.AddClient<ServiceBusReceiver, ServiceBusReceiverOptions>((options, credential, services) =>
+            {
+                var serviceClient = services.GetRequiredService<ServiceBusClient>();
+                var configuration = services.GetRequiredService<IBusConnectionConfiguration>();
+                options.ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete;
+
+                return serviceClient.CreateReceiver(configuration.ExpiredTimersQueueName, options);
+            }).WithName(ServiceBusClientNames.ExpiredTimersReceiver);
+
+            factoryBuilder.AddClient<ServiceBusSender, ServiceBusSenderOptions>((options, credential, services) =>
+            {
+                var serviceClient = services.GetRequiredService<ServiceBusClient>();
+                var configuration = services.GetRequiredService<IBusConnectionConfiguration>();
+
+                return serviceClient.CreateSender(configuration.NotificationsQueueName, options);
+            }).WithName(ServiceBusClientNames.NotificationsSender);
+
+            factoryBuilder.UseCredential(
+                new DefaultAzureCredential(includeInteractiveCredentials: builder.Environment.IsDevelopment()));
         });
 
         builder.Services.AddSingleton<INotificationClient, NotificationClient>();
@@ -78,7 +101,7 @@ public partial class Program
             }, queueNameFactory: services =>
             {
                 var busConfiguration = services.GetRequiredService<IBusConnectionConfiguration>();
-                return busConfiguration.QueueName;
+                return busConfiguration.NotificationsQueueName;
             }, tokenCredentialFactory: _ => new DefaultAzureCredential(), name: "Service Bus Availability");
 
         var app = builder.Build();

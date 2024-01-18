@@ -2,7 +2,9 @@
 
 public interface IBusConnectionConfiguration
 {
-    string Namespace { get; set; }
+    string Namespace { get; init; }
 
-    string QueueName { get; set; }
+    string NotificationsQueueName { get; init; }
+
+    string ExpiredTimersQueueName { get; init; }
 }
