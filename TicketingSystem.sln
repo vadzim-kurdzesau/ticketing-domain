@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IWent.BookingTimer.Messages
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IWent.BookingTimer", "src\IWent.BookingTimer\IWent.BookingTimer.csproj", "{71D9BB11-73B9-4154-A943-589B068F6E94}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IWent.Shared", "src\IWent.Shared\IWent.Shared.csproj", "{99E23FAF-98F6-4CD8-BFA0-FD647264787B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +81,10 @@ Global
 		{71D9BB11-73B9-4154-A943-589B068F6E94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71D9BB11-73B9-4154-A943-589B068F6E94}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71D9BB11-73B9-4154-A943-589B068F6E94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99E23FAF-98F6-4CD8-BFA0-FD647264787B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99E23FAF-98F6-4CD8-BFA0-FD647264787B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99E23FAF-98F6-4CD8-BFA0-FD647264787B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99E23FAF-98F6-4CD8-BFA0-FD647264787B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -94,6 +100,7 @@ Global
 		{FF4B5C7E-6449-49E7-B7D4-35EA33843792} = {723DB40C-ED67-44F1-A5BA-5CFAB198B70B}
 		{4F0EC69C-C8EF-47EA-B95D-35319426322C} = {723DB40C-ED67-44F1-A5BA-5CFAB198B70B}
 		{71D9BB11-73B9-4154-A943-589B068F6E94} = {723DB40C-ED67-44F1-A5BA-5CFAB198B70B}
+		{99E23FAF-98F6-4CD8-BFA0-FD647264787B} = {723DB40C-ED67-44F1-A5BA-5CFAB198B70B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9FAC6FCA-D220-426C-930E-FC7C126D32E1}

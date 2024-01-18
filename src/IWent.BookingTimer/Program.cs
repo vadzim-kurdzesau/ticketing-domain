@@ -2,7 +2,7 @@ using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using IWent.BookingTimer.Configuration;
 using IWent.BookingTimer.Handling;
-using IWent.BookingTimer.Extensions;
+using IWent.Shared.Extensions;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

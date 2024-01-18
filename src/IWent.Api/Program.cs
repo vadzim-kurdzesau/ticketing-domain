@@ -1,6 +1,5 @@
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
-using IWent.Api.Extensions;
 using IWent.Api.Filters;
 using IWent.Api.HealthChecks;
 using IWent.Persistence;
@@ -10,6 +9,7 @@ using IWent.Services.Cart;
 using IWent.Services.DTO;
 using IWent.Services.Notifications;
 using IWent.Services.Notifications.Configuration;
+using IWent.Shared.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

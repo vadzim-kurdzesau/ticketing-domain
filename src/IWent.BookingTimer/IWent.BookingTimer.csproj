@@ -18,5 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IWent.BookingTimer.Messages\IWent.BookingTimer.Messages.csproj" />
+    <ProjectReference Include="..\IWent.Shared\IWent.Shared.csproj" />
   </ItemGroup>
 </Project>
