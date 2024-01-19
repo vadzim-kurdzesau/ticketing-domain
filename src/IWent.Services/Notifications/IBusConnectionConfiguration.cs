@@ -6,5 +6,7 @@ public interface IBusConnectionConfiguration
 
     string NotificationsQueueName { get; init; }
 
+    string BookingTimersQueueName { get; init; }
+
     string ExpiredTimersQueueName { get; init; }
 }

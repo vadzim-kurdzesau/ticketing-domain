@@ -18,6 +18,6 @@ internal class OrderItemEntityConfiguration : IEntityTypeConfiguration<OrderItem
         builder.HasOne(i => i.Price)
             .WithMany();
 
-        builder.HasKey(i => new { i.PaymentId, i.SeatId });
+        builder.HasKey(i => new { i.PaymentId, i.SeatId, i.EventId });
     }
 }

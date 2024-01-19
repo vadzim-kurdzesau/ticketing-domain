@@ -35,6 +35,7 @@ public class BookingTimer : BackgroundService
         using (var timer = new PeriodicTimer(_expiresAfter))
         {
             await timer.WaitForNextTickAsync(stoppingToken);
+            _logger.LogInformation("Booking timer '{BookingId}' has expired after {Seconds} seconds.", _bookingId, _expiresAfter.Seconds);
         }
 
         var bookingExpiredMessage = new BookingExpiredMessage
@@ -57,6 +58,8 @@ public class BookingTimer : BackgroundService
                 });
 
             await retryPolicy.ExecuteAsync(() => _busSender.SendMessageAsync(message, CancellationToken.None));
+
+            _logger.LogDebug("Successfully sent the booking timer expiration message with the booking ID: '{BookingId}'.", _bookingId);
         }
         catch (Exception ex)
         {

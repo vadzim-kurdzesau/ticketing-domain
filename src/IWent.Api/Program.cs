@@ -2,6 +2,7 @@ using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using IWent.Api.Filters;
 using IWent.Api.HealthChecks;
+using IWent.Api.Listeners;
 using IWent.Persistence;
 using IWent.Services;
 using IWent.Services.Caching;
@@ -76,19 +77,12 @@ public partial class Program
                 return serviceClient.CreateReceiver(configuration.ExpiredTimersQueueName, options);
             }).WithName(ServiceBusClientNames.ExpiredTimersReceiver);
 
-            factoryBuilder.AddClient<ServiceBusSender, ServiceBusSenderOptions>((options, credential, services) =>
-            {
-                var serviceClient = services.GetRequiredService<ServiceBusClient>();
-                var configuration = services.GetRequiredService<IBusConnectionConfiguration>();
-
-                return serviceClient.CreateSender(configuration.NotificationsQueueName, options);
-            }).WithName(ServiceBusClientNames.NotificationsSender);
-
             factoryBuilder.UseCredential(
                 new DefaultAzureCredential(includeInteractiveCredentials: builder.Environment.IsDevelopment()));
         });
 
         builder.Services.AddSingleton<INotificationClient, NotificationClient>();
+        builder.Services.AddHostedService<BookingExpirationsListener>();
 
         builder.Services.AddResponseCaching();
         builder.Services.AddHealthChecks()

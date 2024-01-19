@@ -6,5 +6,7 @@ public class BusConnectionConfiguration : IBusConnectionConfiguration
 
     public string NotificationsQueueName { get; init; } = null!;
 
+    public string BookingTimersQueueName { get; init; } = null!;
+
     public string ExpiredTimersQueueName { get; init; } = null!;
 }

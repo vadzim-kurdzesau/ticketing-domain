@@ -11,12 +11,12 @@ namespace IWent.Services.Notifications;
 
 public class NotificationClient : INotificationClient
 {
-    private readonly ServiceBusSender _busSender;
+    private readonly ServiceBusClient _busClient;
     private readonly ILogger<NotificationClient> _logger;
 
-    public NotificationClient(IAzureClientFactory<ServiceBusSender> clientFactory, ILogger<NotificationClient> logger)
+    public NotificationClient(IAzureClientFactory<ServiceBusClient> clientFactory, ILogger<NotificationClient> logger)
     {
-        _busSender = clientFactory.CreateClient(ServiceBusClientNames.NotificationsSender);
+        _busClient = clientFactory.CreateClient(ServiceBusClientNames.DefaultBusClient);
         _logger = logger;
     }
 
@@ -31,7 +31,8 @@ public class NotificationClient : INotificationClient
 
         try
         {
-            await _busSender.SendMessageAsync(queueMessage, cancellationToken);
+            await using var sender = _busClient.CreateSender(queueName);
+            await sender.SendMessageAsync(queueMessage, cancellationToken);
         }
         catch (Exception ex)
         {
