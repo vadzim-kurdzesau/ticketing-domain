@@ -102,7 +102,7 @@ public class PaymentService : IPaymentService
             };
 
             // TODO: add retry logic
-            await _notificationClient.SendMessageAsync(message, _busConfiguration.QueueName, cancellationToken);
+            await _notificationClient.SendMessageAsync(message, _busConfiguration.NotificationsQueueName, cancellationToken);
         }
         catch (Exception ex)
         {

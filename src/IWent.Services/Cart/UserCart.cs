@@ -9,7 +9,7 @@ namespace IWent.Services.Cart;
 /// </summary>
 public class UserCart : IEnumerable<CartItem>
 {
-    private readonly ConcurrentDictionary<int, CartItem> _items = new ConcurrentDictionary<int, CartItem>();
+    private readonly ConcurrentDictionary<CartItemKey, CartItem> _items = new ConcurrentDictionary<CartItemKey, CartItem>();
 
     /// <summary>
     /// The unique identifier of the cart.
@@ -26,14 +26,14 @@ public class UserCart : IEnumerable<CartItem>
     /// </summary>
     /// <returns>True, if <paramref name="item"/> was successfully added; false otherwise.</returns>
     public bool TryAddItem(CartItem item)
-        => _items.TryAdd(item.SeatId, item);
+        => _items.TryAdd(key: new CartItemKey(item.SeatId, item.EventId), item);
 
     /// <summary>
     /// Tries to remove the item with the specified <paramref name="seatId"/> from the cart.
     /// </summary>
     /// <returns>True, if item was successfully removed; false otherwise.</returns>
-    public bool TryRemove(int seatId)
-        => _items.TryRemove(seatId, out var _);
+    public bool TryRemove(CartItemKey key)
+        => _items.TryRemove(key, out var _);
 
     public IEnumerator<CartItem> GetEnumerator()
         => _items.Values.GetEnumerator();
@@ -41,3 +41,5 @@ public class UserCart : IEnumerable<CartItem>
     IEnumerator IEnumerable.GetEnumerator()
         => GetEnumerator();
 }
+
+public record CartItemKey(int SeatId, int EventId);

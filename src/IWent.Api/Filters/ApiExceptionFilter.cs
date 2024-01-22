@@ -3,15 +3,19 @@ using Microsoft.AspNetCore.Mvc;
 using IWent.Services.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace IWent.Api.Filters;
 
 public class ApiExceptionFilter : IActionFilter, IOrderedFilter
 {
+    private readonly IWebHostEnvironment _hostEnvironment;
     private readonly ILogger<ApiExceptionFilter> _logger;
 
-    public ApiExceptionFilter(ILogger<ApiExceptionFilter> logger)
+    public ApiExceptionFilter(IWebHostEnvironment hostEnvironment, ILogger<ApiExceptionFilter> logger)
     {
+        _hostEnvironment = hostEnvironment;
         _logger = logger;
     }
 
@@ -37,7 +41,7 @@ public class ApiExceptionFilter : IActionFilter, IOrderedFilter
 
             context.ExceptionHandled = true;
         }
-        else if (context.Exception is not ApiException)
+        else if (context.Exception is not ApiException && _hostEnvironment.IsProduction())
         {
             _logger.LogError(context.Exception, "An internal exception was thrown.");
             context.Result = new ObjectResult("An internal error occured.")

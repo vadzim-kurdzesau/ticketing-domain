@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <UserSecretsId>dotnet-IWent.BookingTimer-15a0001b-8f08-46f7-8a34-1d33ff0cb860</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.17.2" />
+    <PackageReference Include="Microsoft.Extensions.Azure" Version="1.7.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Polly" Version="8.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IWent.BookingTimer.Messages\IWent.BookingTimer.Messages.csproj" />
+    <ProjectReference Include="..\IWent.Shared\IWent.Shared.csproj" />
+  </ItemGroup>
+</Project>

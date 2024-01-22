@@ -1,9 +1,9 @@
 ﻿using IWent.Notifications.Email;
 using IWent.Notifications.Email.Builders.Templates;
 using IWent.Notifications.Email.Configuration;
-using IWent.Notifications.Extensions;
 using IWent.Notifications.Handling;
 using IWent.Notifications.Handling.Handlers;
+using IWent.Shared.Extensions;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

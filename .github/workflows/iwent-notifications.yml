@@ -2,7 +2,7 @@ name: Build and deploy .NET Core application to Function App iwent-notifications
 on:
   push:
     branches:
-    - hosting-notifications
+    - background-worker
 env:
   AZURE_FUNCTIONAPP_NAME: iwent-notifications
   AZURE_FUNCTIONAPP_PACKAGE_PATH: src\IWent.Notifications\published

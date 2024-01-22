@@ -2,7 +2,11 @@
 
 public class BusConnectionConfiguration : IBusConnectionConfiguration
 {
-    public string Namespace { get; set; }
+    public string Namespace { get; init; } = null!;
 
-    public string QueueName { get; set; }
+    public string NotificationsQueueName { get; init; } = null!;
+
+    public string BookingTimersQueueName { get; init; } = null!;
+
+    public string ExpiredTimersQueueName { get; init; } = null!;
 }

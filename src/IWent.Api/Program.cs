@@ -1,20 +1,24 @@
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
-using IWent.Api.Extensions;
 using IWent.Api.Filters;
 using IWent.Api.HealthChecks;
+using IWent.Api.Listeners;
 using IWent.Persistence;
 using IWent.Services;
 using IWent.Services.Caching;
 using IWent.Services.Cart;
+using IWent.Services.Constants;
 using IWent.Services.DTO;
 using IWent.Services.Notifications;
 using IWent.Services.Notifications.Configuration;
+using IWent.Shared.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.VisualBasic;
 
 namespace IWent.Api;
 
@@ -46,26 +50,49 @@ public partial class Program
         builder.Services.AddScoped<ICartService, CartService>();
         builder.Services.AddScoped<IPaymentService, PaymentService>();
         builder.Services.AddSingleton<ICartStorage, InMemoryCartStorage>();
-        builder.Services.AddSingleton(typeof(ICacheService<>), typeof(CacheService<>));
 
         builder.Services.AddConfiguration<ICacheConfiguration, CacheConfiguration>("Caching");
         builder.Services.AddConfiguration<IBusConnectionConfiguration, BusConnectionConfiguration>("BusConnection");
 
-        builder.Services.AddDistributedSqlServerCache(options =>
-        {
-            options.ConnectionString = builder.Configuration.GetConnectionString("Cache");
-            options.SchemaName = "dbo";
-            options.TableName = "EventsCache";
-        });
+        var intermediateServiceProvider = builder.Services.BuildServiceProvider();
 
-        builder.Services.AddSingleton<ServiceBusClient>(services =>
+        var cacheConfiguration = intermediateServiceProvider.GetRequiredService<ICacheConfiguration>();
+        if (cacheConfiguration.IsEnabled)
         {
-            var busConfiguration = services.GetRequiredService<IBusConnectionConfiguration>();
-            var credential = new DefaultAzureCredential(includeInteractiveCredentials: true);
-            return new ServiceBusClient(busConfiguration.Namespace, credential);
+            builder.Services.AddSingleton(typeof(ICacheService<>), typeof(CacheService<>));
+
+            builder.Services.AddDistributedSqlServerCache(options =>
+            {
+                options.ConnectionString = builder.Configuration.GetConnectionString("Cache");
+                options.SchemaName = "dbo";
+                options.TableName = "EventsCache";
+            });
+        }
+        else
+        {
+            builder.Services.AddSingleton(typeof(ICacheService<>), typeof(NullCacheService<>));
+        }
+
+        var busConfiguration = intermediateServiceProvider.GetRequiredService<IBusConnectionConfiguration>();
+        builder.Services.AddAzureClients(factoryBuilder =>
+        {
+            factoryBuilder.AddServiceBusClientWithNamespace(busConfiguration.Namespace);
+
+            factoryBuilder.AddClient<ServiceBusReceiver, ServiceBusReceiverOptions>((options, credential, services) =>
+            {
+                var serviceClient = services.GetRequiredService<ServiceBusClient>();
+                var configuration = services.GetRequiredService<IBusConnectionConfiguration>();
+                options.ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete;
+
+                return serviceClient.CreateReceiver(configuration.ExpiredTimersQueueName, options);
+            }).WithName(ServiceBusClientNames.ExpiredTimersReceiver);
+
+            factoryBuilder.UseCredential(
+                new DefaultAzureCredential(includeInteractiveCredentials: builder.Environment.IsDevelopment()));
         });
 
         builder.Services.AddSingleton<INotificationClient, NotificationClient>();
+        builder.Services.AddHostedService<BookingExpirationsListener>();
 
         builder.Services.AddResponseCaching();
         builder.Services.AddHealthChecks()
@@ -78,7 +105,7 @@ public partial class Program
             }, queueNameFactory: services =>
             {
                 var busConfiguration = services.GetRequiredService<IBusConnectionConfiguration>();
-                return busConfiguration.QueueName;
+                return busConfiguration.NotificationsQueueName;
             }, tokenCredentialFactory: _ => new DefaultAzureCredential(), name: "Service Bus Availability");
 
         var app = builder.Build();
