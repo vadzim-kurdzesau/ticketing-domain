@@ -50,20 +50,30 @@ public partial class Program
         builder.Services.AddScoped<ICartService, CartService>();
         builder.Services.AddScoped<IPaymentService, PaymentService>();
         builder.Services.AddSingleton<ICartStorage, InMemoryCartStorage>();
-        builder.Services.AddSingleton(typeof(ICacheService<>), typeof(CacheService<>));
 
         builder.Services.AddConfiguration<ICacheConfiguration, CacheConfiguration>("Caching");
         builder.Services.AddConfiguration<IBusConnectionConfiguration, BusConnectionConfiguration>("BusConnection");
 
-        builder.Services.AddDistributedSqlServerCache(options =>
-        {
-            options.ConnectionString = builder.Configuration.GetConnectionString("Cache");
-            options.SchemaName = "dbo";
-            options.TableName = "EventsCache";
-        });
+        var intermediateServiceProvider = builder.Services.BuildServiceProvider();
 
-        var busConfiguration = builder.Services.BuildServiceProvider()
-            .GetRequiredService<IBusConnectionConfiguration>();
+        var cacheConfiguration = intermediateServiceProvider.GetRequiredService<ICacheConfiguration>();
+        if (cacheConfiguration.IsEnabled)
+        {
+            builder.Services.AddSingleton(typeof(ICacheService<>), typeof(CacheService<>));
+
+            builder.Services.AddDistributedSqlServerCache(options =>
+            {
+                options.ConnectionString = builder.Configuration.GetConnectionString("Cache");
+                options.SchemaName = "dbo";
+                options.TableName = "EventsCache";
+            });
+        }
+        else
+        {
+            builder.Services.AddSingleton(typeof(ICacheService<>), typeof(NullCacheService<>));
+        }
+
+        var busConfiguration = intermediateServiceProvider.GetRequiredService<IBusConnectionConfiguration>();
         builder.Services.AddAzureClients(factoryBuilder =>
         {
             factoryBuilder.AddServiceBusClientWithNamespace(busConfiguration.Namespace);
